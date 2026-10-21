@@ -1,0 +1,168 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Dashboard | Auditex{% endblock %}
+
+{% block nav_dashboard %}active{% endblock %}
+
+{% block breadcrumb %}
+<span class="breadcrumb-current">
+    Dashboard
+</span>
+{% endblock %}
+
+{% block nome_usuario %}
+    {{ usuario_logado.email }}
+{% endblock %}
+
+{% block conteudo %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+
+        <div>
+            <h1 class="h3 mb-2">
+                Bem-vindo ao Auditex
+            </h1>
+
+            <p class="text-secondary mb-0">
+                Plataforma de Auditoria e Gestão.
+            </p>
+        </div>
+
+        <span class="badge text-bg-primary px-3 py-2">
+            {{ usuario_logado.nivel|capitalize }}
+        </span>
+
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-12 col-md-6 col-xl-4">
+
+            <div class="card h-100 shadow-sm border-0">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+
+                        <div class="fs-3 text-primary">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+
+                        <h2 class="h5 mb-0">
+                            Leitora de CCB
+                        </h2>
+
+                    </div>
+
+                    <p class="text-secondary">
+                        Acesse a área de leitura e análise de documentos.
+                    </p>
+
+                    <a href="/leitora" class="btn btn-outline-primary">
+                        Acessar leitora
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-4">
+
+            <div class="card h-100 shadow-sm border-0">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+
+                        <div class="fs-3 text-primary">
+                            <i class="bi bi-clipboard2-check"></i>
+                        </div>
+
+                        <h2 class="h5 mb-0">
+                            Auditorias
+                        </h2>
+
+                    </div>
+
+                    <p class="text-secondary">
+                        Consulte e acompanhe as auditorias.
+                    </p>
+
+                    <a href="/auditorias" class="btn btn-outline-primary">
+                        Acessar auditorias
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-4">
+
+            <div class="card h-100 shadow-sm border-0">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+
+                        <div class="fs-3 text-primary">
+                            <i class="bi bi-bar-chart"></i>
+                        </div>
+
+                        <h2 class="h5 mb-0">
+                            Relatórios
+                        </h2>
+
+                    </div>
+
+                    <p class="text-secondary">
+                        Acesse a área de relatórios e indicadores.
+                    </p>
+
+                    <a href="/relatorios" class="btn btn-outline-primary">
+                        Ver relatórios
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% if usuario_logado.nivel == "admin" %}
+
+    <div class="card border-0 shadow-sm mt-4">
+
+        <div class="card-body p-4">
+
+            <h2 class="h5 mb-2">
+                <i class="bi bi-shield-lock me-2"></i>
+                Administração
+            </h2>
+
+            <p class="text-secondary">
+                Gerencie usuários, níveis de acesso e sessões.
+            </p>
+
+            <a href="/usuarios" class="btn btn-primary">
+                <i class="bi bi-people me-2"></i>
+                Gerenciar usuários
+            </a>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

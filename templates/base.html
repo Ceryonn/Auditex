@@ -1,0 +1,553 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="description"
+        content="Auditex - Plataforma de Auditoria e Gestão"
+    >
+
+    <title>{% block titulo %}Auditex{% endblock %}</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+    <!-- Auditex CSS -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/css/app.css') }}"
+    >
+
+    {% block estilos %}{% endblock %}
+
+    <!-- Favicon -->
+    <link
+        rel="icon"
+        type="image/x-icon"
+        href="{{ url_for('static', path='images/icon.ico') }}"
+    >
+
+</head>
+
+<body>
+
+<!-- OVERLAY MOBILE -->
+<div
+    class="sidebar-overlay"
+    id="sidebarOverlay"
+></div>
+
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+
+    <!-- MARCA -->
+    <div class="sidebar-brand">
+
+        <a href="/" class="brand-link">
+
+            <div class="brand-icon">
+                <i class="bi bi-shield-check"></i>
+            </div>
+
+            <div class="brand-text">
+                <span class="brand-name">AUDITEX</span>
+                <span class="brand-subtitle">Auditoria &amp; Gestão</span>
+            </div>
+
+        </a>
+
+        <button
+            type="button"
+            class="sidebar-close d-lg-none"
+            id="sidebarClose"
+            aria-label="Fechar menu"
+        >
+            <i class="bi bi-x-lg"></i>
+        </button>
+
+    </div>
+
+
+    <!-- NAVEGAÇÃO -->
+    <nav class="sidebar-nav">
+
+        <!-- PRINCIPAL -->
+        <div class="nav-section">
+
+            <span class="nav-section-title">Principal</span>
+
+            <a
+                href="/"
+                class="nav-link {% block nav_dashboard %}{% endblock %}"
+            >
+                <span class="nav-icon">
+                    <i class="bi bi-grid-1x2"></i>
+                </span>
+
+                <span class="nav-label">Dashboard</span>
+            </a>
+
+        </div>
+
+
+        <!-- LEITORA -->
+        <div class="nav-section">
+
+            <span class="nav-section-title">Leitora de CCB</span>
+
+            <a
+                href="/leitora"
+                class="nav-link {% block nav_leitora %}{% endblock %}"
+            >
+                <span class="nav-icon">
+                    <i class="bi bi-file-earmark-text"></i>
+                </span>
+
+                <span class="nav-label">Leitora</span>
+            </a>
+
+            <a
+                href="/leitora/nova"
+                class="nav-link {% block nav_nova_leitora %}{% endblock %}"
+            >
+                <span class="nav-icon">
+                    <i class="bi bi-plus-circle"></i>
+                </span>
+
+                <span class="nav-label">Nova Leitura</span>
+            </a>
+
+        </div>
+
+
+        <!-- AUDITORIA -->
+        <div class="nav-section">
+
+            <span class="nav-section-title">Auditoria</span>
+
+            <a
+                href="/auditorias"
+                class="nav-link {% block nav_auditorias %}{% endblock %}"
+            >
+                <span class="nav-icon">
+                    <i class="bi bi-clipboard2-check"></i>
+                </span>
+
+                <span class="nav-label">Auditorias</span>
+            </a>
+
+            <a
+                href="/auditorias/nova"
+                class="nav-link {% block nav_nova_auditoria %}{% endblock %}"
+            >
+                <span class="nav-icon">
+                    <i class="bi bi-plus-circle"></i>
+                </span>
+
+                <span class="nav-label">Nova auditoria</span>
+            </a>
+
+            <a
+                href="/auditores"
+                class="nav-link {% block nav_auditores %}{% endblock %}"
+            >
+                <span class="nav-icon">
+                    <i class="bi bi-people"></i>
+                </span>
+
+                <span class="nav-label">Auditores</span>
+            </a>
+
+        </div>
+
+
+        <!-- ANÁLISES -->
+        <div class="nav-section">
+
+            <span class="nav-section-title">Análises</span>
+
+            <a
+                href="/relatorios"
+                class="nav-link {% block nav_relatorios %}{% endblock %}"
+            >
+                <span class="nav-icon">
+                    <i class="bi bi-bar-chart"></i>
+                </span>
+
+                <span class="nav-label">Relatórios</span>
+            </a>
+
+            <a
+                href="/indicadores"
+                class="nav-link {% block nav_indicadores %}{% endblock %}"
+            >
+                <span class="nav-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </span>
+
+                <span class="nav-label">Indicadores</span>
+            </a>
+
+        </div>
+
+
+        <!-- ADMINISTRAÇÃO -->
+        {% if usuario_logado and usuario_logado.nivel == "admin" %}
+
+        <div class="nav-section">
+
+            <span class="nav-section-title">Administração</span>
+
+            <a
+                href="/usuarios"
+                class="nav-link {% block nav_usuarios %}{% endblock %}"
+            >
+                <span class="nav-icon">
+                    <i class="bi bi-person-gear"></i>
+                </span>
+
+                <span class="nav-label">Usuários</span>
+            </a>
+
+            <a
+                href="/configuracoes"
+                class="nav-link {% block nav_configuracoes %}{% endblock %}"
+            >
+                <span class="nav-icon">
+                    <i class="bi bi-gear"></i>
+                </span>
+
+                <span class="nav-label">Configurações</span>
+            </a>
+
+            <a
+                href="/logs"
+                class="nav-link {% block nav_logs %}{% endblock %}"
+            >
+                <span class="nav-icon">
+                    <i class="bi bi-journal-text"></i>
+                </span>
+
+                <span class="nav-label">Logs do sistema</span>
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </nav>
+
+
+    <!-- RODAPÉ DA SIDEBAR -->
+    <div class="sidebar-footer">
+
+        {% if usuario_logado %}
+
+        <a href="/logout" class="sidebar-logout js-logout">
+
+            <span class="nav-icon">
+                <i class="bi bi-box-arrow-left"></i>
+            </span>
+
+            <span class="nav-label">Sair</span>
+
+        </a>
+
+        {% endif %}
+
+        <div class="sidebar-version">
+            Auditex v1.0.0
+        </div>
+
+    </div>
+
+</aside>
+
+
+<!-- ÁREA PRINCIPAL -->
+<div class="main-wrapper">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+
+        <!-- LADO ESQUERDO -->
+        <div class="topbar-left">
+
+            <button
+                type="button"
+                class="mobile-menu-button"
+                id="sidebarToggle"
+                aria-label="Abrir menu"
+            >
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div class="breadcrumb-area">
+
+                {% block breadcrumb %}
+                <span class="breadcrumb-current">Auditex</span>
+                {% endblock %}
+
+            </div>
+
+        </div>
+
+
+        <!-- AÇÕES DA TOPBAR -->
+        <div class="topbar-actions">
+
+            {% if usuario_logado %}
+
+            <!-- NOTIFICAÇÕES -->
+            <button
+                type="button"
+                class="topbar-button"
+                title="Notificações"
+                aria-label="Notificações"
+            >
+                <i class="bi bi-bell"></i>
+                <span class="notification-dot"></span>
+            </button>
+
+            <div class="topbar-divider"></div>
+
+
+            <!-- MENU DO USUÁRIO -->
+            <div class="dropdown user-dropdown">
+
+                <button
+                    type="button"
+                    class="user-menu"
+                    id="userMenuToggle"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    aria-label="Abrir menu do usuário"
+                >
+
+                    <div class="user-avatar">
+                        <i class="bi bi-person"></i>
+                    </div>
+
+                    <div class="user-details">
+
+                        <span class="user-name">
+                            {{ usuario_logado.email }}
+                        </span>
+
+                        <span class="user-role">
+
+                            {% if usuario_logado.nivel == "admin" %}
+                                Administrador
+                            {% elif usuario_logado.nivel == "operacional" %}
+                                Operacional
+                            {% elif usuario_logado.nivel == "pendente" %}
+                                Pendente
+                            {% else %}
+                                {{ usuario_logado.nivel }}
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+                    <i class="bi bi-chevron-down user-chevron"></i>
+
+                </button>
+
+
+                <!-- OPÇÕES DO MENU -->
+                <ul
+                    class="dropdown-menu dropdown-menu-end shadow-sm"
+                    aria-labelledby="userMenuToggle"
+                >
+
+                    <li>
+                        <div class="dropdown-item-text">
+
+                            <div class="fw-semibold">
+                                Conta conectada
+                            </div>
+
+                            <small class="text-secondary">
+                                {{ usuario_logado.email }}
+                            </small>
+
+                            <div class="mt-2">
+
+                                {% if usuario_logado.nivel == "admin" %}
+
+                                <span class="badge text-bg-primary">
+                                    Administrador
+                                </span>
+
+                                {% elif usuario_logado.nivel == "operacional" %}
+
+                                <span class="badge text-bg-success">
+                                    Operacional
+                                </span>
+
+                                {% else %}
+
+                                <span class="badge text-bg-secondary">
+                                    {{ usuario_logado.nivel }}
+                                </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+                    </li>
+
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <li>
+                        <a
+                            href="/logout"
+                            class="dropdown-item text-danger js-logout"
+                        >
+                            <i class="bi bi-box-arrow-right me-2"></i>
+                            Sair do Auditex
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+            {% else %}
+
+            <!-- USUÁRIO DESLOGADO -->
+            <a href="/login" class="topbar-login">
+
+                <i class="bi bi-box-arrow-in-right"></i>
+                Entrar
+
+            </a>
+
+            {% endif %}
+
+        </div>
+
+    </header>
+
+
+    <!-- CONTEÚDO -->
+    <main class="page-content">
+
+        <!-- MENSAGENS -->
+        {% if messages %}
+
+        <div class="flash-container">
+
+            {% for message in messages %}
+
+            <div
+                class="auditex-alert alert-{{ message.category|default('info') }}"
+                role="alert"
+            >
+
+                {% if message.category == "success" %}
+
+                    <i class="bi bi-check-circle-fill"></i>
+
+                {% elif message.category == "danger" %}
+
+                    <i class="bi bi-exclamation-octagon-fill"></i>
+
+                {% elif message.category == "warning" %}
+
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+
+                {% else %}
+
+                    <i class="bi bi-info-circle-fill"></i>
+
+                {% endif %}
+
+                <span>
+                    {{ message.text|default(message) }}
+                </span>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Fechar"
+                    onclick="this.parentElement.remove()"
+                ></button>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- CONTEÚDO ESPECÍFICO DA PÁGINA -->
+        {% block conteudo %}
+        {% endblock %}
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+
+        <div class="footer-left">
+            © 2026 Auditex
+        </div>
+
+        <div class="footer-right">
+
+            <span>Auditoria &amp; Gestão</span>
+
+            {% if usuario_logado and usuario_logado.nivel == "admin" %}
+
+            <span class="footer-separator">•</span>
+
+            <a href="/docs">
+                Documentação da API
+            </a>
+
+            {% endif %}
+
+        </div>
+
+    </footer>
+
+</div>
+
+
+<!-- BOOTSTRAP JS -->
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+></script>
+
+<!-- AUDITEX JS -->
+<script
+    src="{{ url_for('static', path='/js/app.js') }}"
+></script>
+
+{% block scripts %}{% endblock %}
+
+</body>
+</html>

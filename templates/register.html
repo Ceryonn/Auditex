@@ -1,0 +1,190 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Criar conta | Auditex{% endblock %}
+
+{% block conteudo %}
+
+<div class="login-page">
+    <div class="login-container">
+
+        <section class="login-info">
+            <div class="login-info-content">
+                <div class="login-info-text">
+                    <span class="login-eyebrow">
+                        Plataforma de auditoria
+                    </span>
+
+                    <h1>
+                        Faça parte do Auditex.<br>
+                        <strong>Organize sua gestão.</strong>
+                    </h1>
+
+                    <p>
+                        Crie sua conta para solicitar acesso
+                        à plataforma de auditoria e gestão.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="login-form-area">
+            <div class="login-form-wrapper">
+
+                <div class="login-mobile-brand">
+                    <div class="brand-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                </div>
+
+                <div class="login-heading">
+                    <h2>Criar sua conta</h2>
+                    <p>
+                        Preencha os campos para se cadastrar.
+                    </p>
+                </div>
+
+                {% if error %}
+                <div class="auditex-alert alert-danger login-alert"
+                     role="alert">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    <span>{{ error }}</span>
+                </div>
+                {% endif %}
+
+                {% if success %}
+                <div class="auditex-alert alert-success login-alert"
+                     role="alert">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>{{ success }}</span>
+                </div>
+                {% endif %}
+
+                {% if not success %}
+                <form
+                    action="/registro"
+                    method="post"
+                    data-prevent-double-submit
+                >
+
+                    <div class="auditex-form-group">
+                        <label for="email" class="auditex-label">
+                            E-mail
+                        </label>
+
+                        <div class="login-input-wrapper">
+                            <span class="login-input-icon">
+                                <i class="bi bi-envelope"></i>
+                            </span>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="auditex-input login-input"
+                                value="{{ email or '' }}"
+                                placeholder="seu@email.com"
+                                autocomplete="email"
+                                maxlength="255"
+                                required
+                                autofocus
+                            >
+                        </div>
+                    </div>
+
+                    <div class="auditex-form-group">
+                        <label for="senha" class="auditex-label">
+                            Senha
+                        </label>
+
+                        <div class="login-input-wrapper">
+                            <span class="login-input-icon">
+                                <i class="bi bi-lock"></i>
+                            </span>
+
+                            <input
+                                type="password"
+                                id="senha"
+                                name="senha"
+                                class="auditex-input login-input"
+                                placeholder="Mínimo de 8 caracteres"
+                                autocomplete="new-password"
+                                minlength="8"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="login-password-toggle"
+                                data-toggle-password="#senha"
+                                aria-label="Mostrar senha"
+                                title="Mostrar senha"
+                            >
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="auditex-form-group">
+                        <label
+                            for="confirmar_senha"
+                            class="auditex-label"
+                        >
+                            Confirmar senha
+                        </label>
+
+                        <div class="login-input-wrapper">
+                            <span class="login-input-icon">
+                                <i class="bi bi-lock-fill"></i>
+                            </span>
+
+                            <input
+                                type="password"
+                                id="confirmar_senha"
+                                name="confirmar_senha"
+                                class="auditex-input login-input"
+                                placeholder="Digite a senha novamente"
+                                autocomplete="new-password"
+                                minlength="8"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="login-password-toggle"
+                                data-toggle-password="#confirmar_senha"
+                                aria-label="Mostrar confirmação da senha"
+                                title="Mostrar senha"
+                            >
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="auditex-btn auditex-btn-primary login-submit"
+                    >
+                        <span>Criar conta</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+
+                </form>
+                {% endif %}
+
+                <div class="login-register">
+                    <span>Já possui uma conta?</span>
+                    <a href="/login">Entrar</a>
+                </div>
+
+                <div class="login-copyright">
+                    © 2026 Auditex. Todos os direitos reservados.
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+</div>
+
+{% endblock %}
