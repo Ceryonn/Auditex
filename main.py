@@ -6,7 +6,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import inspect, text
 
-from rotas import auth, users, registro, admin
+from rotas import auth, users, registro, admin, leitora
 from database.database import Base, engine, obter_db
 from models import User
 from rotas.auth import obter_usuario_logado_web
@@ -18,10 +18,6 @@ from rotas.auth import obter_usuario_logado_web
 
 Base.metadata.create_all(bind=engine)
 
-
-# SQLite não adiciona colunas novas automaticamente
-# quando uma tabela já existe.
-# Esta migração preserva os usuários existentes.
 
 colunas_users = {
     coluna["name"]
@@ -59,7 +55,7 @@ app.include_router(auth.logout_router)
 app.include_router(users.router)
 app.include_router(registro.router)
 app.include_router(admin.router)
-
+app.include_router(leitora.router)
 
 templates = Jinja2Templates(
     directory="templates"
