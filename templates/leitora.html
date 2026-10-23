@@ -1,0 +1,337 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Leitora de CCB | Auditex{% endblock %}
+
+{% block nav_leitora %}active{% endblock %}
+
+{% block breadcrumb %}
+<span>Leitora de CCB</span>
+<i class="bi bi-chevron-right"></i>
+<span class="breadcrumb-current">Leitora</span>
+{% endblock %}
+
+{% block estilos %}
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', path='/css/leitora.css') }}"
+>
+{% endblock %}
+
+{% block conteudo %}
+
+<section class="page-header leitora-header">
+    <div>
+        <div class="leitora-eyebrow">
+            <i class="bi bi-file-earmark-check"></i>
+            LEITORA DE CÉDULA DE CRÉDITO BANCÁRIO
+        </div>
+
+        <h1>Leitora de CCB</h1>
+
+        <p>
+            Extraia informações contratuais e confira os dados
+            identificados no documento.
+        </p>
+    </div>
+
+    <span class="auditex-badge auditex-badge-primary leitora-version">
+        <i class="bi bi-stars"></i>
+        Extração de dados
+    </span>
+</section>
+
+<div class="leitora-layout">
+
+    <!-- UPLOAD -->
+    <section class="auditex-card leitora-upload-card">
+
+        <div class="auditex-card-header">
+            <div>
+                <h2 class="auditex-card-title">
+                    <i class="bi bi-cloud-arrow-up text-primary-auditex me-2"></i>
+                    Enviar documento
+                </h2>
+                <div class="auditex-card-subtitle">
+                    Selecione a CCB que deseja analisar.
+                </div>
+            </div>
+
+            <span class="leitora-step">01</span>
+        </div>
+
+        <div class="auditex-card-body">
+
+            <form id="leitoraForm" enctype="multipart/form-data">
+
+                <input
+                    type="file"
+                    id="pdfInput"
+                    name="pdf"
+                    accept=".pdf,application/pdf"
+                    hidden
+                >
+
+                <div
+                    id="dropZone"
+                    class="leitora-dropzone"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Selecionar arquivo PDF"
+                    aria-describedby="uploadHelp"
+                >
+                    <div class="leitora-upload-icon">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                    </div>
+
+                    <h3>Arraste sua CCB até aqui</h3>
+
+                    <p>
+                        ou
+                        <span class="leitora-browse">selecione um arquivo</span>
+                        no seu dispositivo
+                    </p>
+
+                    <span class="leitora-file-limit">
+                        <i class="bi bi-shield-check"></i>
+                        Arquivo PDF de até 15 MB
+                    </span>
+                </div>
+
+                <div id="selectedFile" class="leitora-selected-file" hidden>
+                    <div class="leitora-file-icon">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                    </div>
+
+                    <div class="leitora-file-info">
+                        <strong id="fileName">documento.pdf</strong>
+                        <span id="fileSize">0 KB</span>
+                    </div>
+
+                    <button
+                        type="button"
+                        id="removeFile"
+                        class="leitora-icon-button"
+                        aria-label="Remover arquivo"
+                        title="Remover arquivo"
+                    >
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <div id="uploadHelp" class="auditex-help mt-3">
+                    O documento será processado para identificar os dados
+                    disponíveis no texto do PDF.
+                </div>
+
+                <div
+                    id="leitoraError"
+                    class="leitora-feedback leitora-feedback-error"
+                    role="alert"
+                    hidden
+                ></div>
+
+                <div
+                    id="leitoraStatus"
+                    class="leitora-feedback leitora-feedback-info"
+                    role="status"
+                    aria-live="polite"
+                    hidden
+                ></div>
+
+                <button
+                    type="submit"
+                    id="processButton"
+                    class="auditex-btn auditex-btn-primary leitora-process-button"
+                    disabled
+                >
+                    <i class="bi bi-search"></i>
+                    Extrair dados da CCB
+                </button>
+
+            </form>
+
+            <div class="leitora-security-note">
+                <i class="bi bi-lock"></i>
+                <span>
+                    A leitura é realizada pelo backend da aplicação.
+                    Os resultados desta tela não são salvos automaticamente.
+                </span>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- PAINEL DE RESULTADOS -->
+    <section class="auditex-card leitora-results-card">
+
+        <div class="auditex-card-header">
+            <div>
+                <h2 class="auditex-card-title">
+                    <i class="bi bi-card-list text-primary-auditex me-2"></i>
+                    Dados identificados
+                </h2>
+
+                <div class="auditex-card-subtitle">
+                    Confira as informações extraídas do contrato.
+                </div>
+            </div>
+
+            <span id="resultBadge" class="auditex-badge auditex-badge-neutral">
+                Aguardando PDF
+            </span>
+        </div>
+
+        <div class="auditex-card-body">
+
+            <div id="resultsEmpty" class="leitora-empty-state">
+                <div class="leitora-empty-icon">
+                    <i class="bi bi-file-earmark-text"></i>
+                </div>
+
+                <h3>Nenhuma leitura realizada</h3>
+
+                <p>
+                    Envie um arquivo PDF e clique em
+                    <strong>Extrair dados da CCB</strong> para visualizar
+                    as informações identificadas.
+                </p>
+            </div>
+
+            <div id="resultsContent" hidden>
+
+                <div class="leitora-result-summary">
+                    <div class="leitora-summary-icon">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+
+                    <div>
+                        <strong>Processamento concluído</strong>
+                        <span>Confira os dados antes de utilizá-los.</span>
+                    </div>
+                </div>
+
+                <div class="leitora-section-heading">
+                    <i class="bi bi-person-vcard"></i>
+                    Identificação do cliente
+                </div>
+
+                <div class="leitora-fields-grid">
+
+                    <div class="leitora-field leitora-field-wide">
+                        <label for="resultNome">Nome do cliente</label>
+                        <input
+                            id="resultNome"
+                            class="auditex-input"
+                            type="text"
+                            readonly
+                            placeholder="Não identificado"
+                        >
+                    </div>
+
+                    <div class="leitora-field">
+                        <label for="resultCpf">CPF</label>
+                        <input
+                            id="resultCpf"
+                            class="auditex-input"
+                            type="text"
+                            readonly
+                            placeholder="Não identificado"
+                        >
+                    </div>
+
+                    <div class="leitora-field">
+                        <label for="resultRg">RG</label>
+                        <input
+                            id="resultRg"
+                            class="auditex-input"
+                            type="text"
+                            readonly
+                            placeholder="Não identificado"
+                        >
+                    </div>
+
+                    <div class="leitora-field leitora-field-wide">
+                        <label for="resultKg">Número KG</label>
+                        <input
+                            id="resultKg"
+                            class="auditex-input"
+                            type="text"
+                            readonly
+                            placeholder="Não identificado"
+                        >
+                    </div>
+
+                </div>
+
+                <div class="leitora-section-heading leitora-financial-heading">
+                    <i class="bi bi-currency-dollar"></i>
+                    Informações financeiras
+                </div>
+
+                <div class="leitora-financial-grid">
+
+                    <div class="leitora-money-card">
+                        <span>Valor liberado</span>
+                        <strong id="resultValorLiberado">—</strong>
+                        <small>Valor destinado ao cliente</small>
+                    </div>
+
+                    <div class="leitora-money-card leitora-money-highlight">
+                        <span>Valor total da dívida</span>
+                        <strong id="resultValorTotal">—</strong>
+                        <small>Valor total identificado na CCB</small>
+                    </div>
+
+                </div>
+
+                <div class="leitora-result-footer">
+                    <span>
+                        <i class="bi bi-info-circle"></i>
+                        Os dados devem ser conferidos com o documento original.
+                    </span>
+
+                    <button
+                        type="button"
+                        id="viewTextButton"
+                        class="auditex-btn auditex-btn-secondary"
+                    >
+                        <i class="bi bi-file-text"></i>
+                        Ver texto extraído
+                    </button>
+                </div>
+
+                <div id="textPanel" class="leitora-text-panel" hidden>
+                    <div class="leitora-text-header">
+                        <div>
+                            <strong>Texto do documento</strong>
+                            <p>Conteúdo textual extraído do PDF.</p>
+                        </div>
+
+                        <button
+                            type="button"
+                            id="closeTextButton"
+                            class="leitora-icon-button"
+                            aria-label="Fechar texto"
+                        >
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <pre id="extractedText" class="leitora-extracted-text"></pre>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script
+    src="{{ url_for('static', path='/js/leitora.js') }}"
+></script>
+{% endblock %}
