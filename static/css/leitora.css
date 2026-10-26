@@ -552,3 +552,92 @@
         padding: 15px;
     }
 }
+
+
+
+
+/* Tabela de parcelas da CCB */
+
+.leitora-parcelas-heading {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 28px;
+}
+
+.leitora-parcelas-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--auditex-primary-light, #eef2ff);
+    color: var(--auditex-primary, #4338ca);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.leitora-parcelas-container {
+    margin-top: 14px;
+    border: 1px solid var(--auditex-border, #e5e7eb);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.leitora-parcelas-empty {
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--auditex-text-muted, #6b7280);
+    font-size: 14px;
+}
+
+.leitora-parcelas-empty i {
+    margin-right: 6px;
+}
+
+.leitora-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.leitora-parcelas-table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.leitora-parcelas-table th {
+    padding: 13px 14px;
+    background: var(--auditex-surface, #f8fafc);
+    color: var(--auditex-text-muted, #64748b);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--auditex-border, #e5e7eb);
+}
+
+.leitora-parcelas-table td {
+    padding: 12px 14px;
+    color: var(--auditex-text, #334155);
+    border-bottom: 1px solid var(--auditex-border, #e5e7eb);
+    white-space: nowrap;
+}
+
+.leitora-parcelas-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.leitora-parcelas-table tbody tr:hover {
+    background: var(--auditex-surface, #f8fafc);
+}
+
+.leitora-parcelas-table .text-end {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+
+

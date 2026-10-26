@@ -304,7 +304,8 @@ def extrair_dados_ccb(texto):
         "kg": kg,
         "nome": nome,
         "valor liberado": valor_lib,
-        "valor total": vlrtccb
+        "valor total": vlrtccb,
+        "parcelas": extrair_parcelas_ccb(texto)
     }
 
 
@@ -313,7 +314,7 @@ def extrair_dados_ccb(texto):
 # ============================================================
 
 @router.get("/leitora", response_class=HTMLResponse)
-async def pagina_leitora(
+async def front_leitora(
     request: Request,
     usuario=Depends(exigir_usuario_logado),
 ):
@@ -326,10 +327,87 @@ async def pagina_leitora(
         },
     )
 
+@router.get("/leitora/ccb", response_class=HTMLResponse)
+async def pagina_leitora(
+    request: Request,
+    usuario=Depends(exigir_usuario_logado),
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="leitoraccb.html",
+        context={
+            "usuario_logado": usuario,
+            "messages": [],
+        },
+    )
+
+
+@router.get("/leitora/comp", response_class=HTMLResponse)
+async def pagina_leitora_comp(
+    request: Request,
+    usuario=Depends(exigir_usuario_logado),
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="leitoracomp.html",
+        context={
+            "usuario_logado": usuario,
+            "messages": [],
+        },
+    )
+
+
+
+def extrair_parcelas_ccb(texto: str) -> list[dict]:
+    parcelas = []
+
+    if not texto:
+        return parcelas
+
+    texto = texto.replace("\xa0", " ")
+
+    padrao_valor = r"(?:\d{1,3}(?:\.\d{3})+|\d+)[,.]\d{2}"
+
+    padrao_linha = re.compile(
+        rf"^\s*"
+        rf"(?P<parcela>\d{{1,4}})\s+"
+        rf"(?P<vencimento>\d{{2}}/\d{{2}}/\d{{4}})\s+"
+        rf"(?P<prazo>\d{{1,5}})\s+"
+        rf"(?P<valor_parcela>{padrao_valor})\s+"
+        rf"(?P<descontos>{padrao_valor})\s+"
+        rf"(?P<divida>{padrao_valor})"
+        rf"\s*$"
+    )
+
+    for linha in texto.splitlines():
+        linha = linha.strip()
+
+        if not linha:
+            continue
+
+        match = padrao_linha.match(linha)
+
+        if not match:
+            continue
+
+        dados = match.groupdict()
+
+        parcelas.append({
+            "parcela": dados["parcela"],
+            "vencimento": dados["vencimento"],
+            "prazo": int(dados["prazo"]),
+            "valor_parcela": dados["valor_parcela"],
+            "descontos": dados["descontos"],
+            "divida": dados["divida"],
+        })
+
+    return parcelas
+
+
 
 # ============================================================
 
-@router.post("/leitora", response_class=HTMLResponse)
+@router.post("/leitora/nova", response_class=HTMLResponse)
 async def leitora_geral(
     pdf: UploadFile = File(...),
     usuario=Depends(exigir_usuario_logado),
@@ -362,4 +440,86 @@ async def parse_leitora(
 
     return JSONResponse(
         content=extrair_dados_ccb(texto)
+    )
+
+
+
+
+
+## Comprovante - Funcionalidade semana 26.10
+
+
+def extrair_comp(texto):
+
+    dados = {
+        "nome": None,
+        "valor": None,
+        "cpf_miolo": None
+    }
+
+    linhas = [
+        l.strip()
+        for l in texto.splitlines()
+        if l.strip()
+    ]
+
+
+    for i, linha in enumerate(linhas):
+        if linha.lower().rstrip(":") == 'valor':
+            if i + 1 < len(linhas):
+                dados['valor'] = normalizar_valor(linhas[i + 1])
+            break
+
+    for i, linha in enumerate(linhas):
+        if linha.lower().rstrip(":") == 'nome':
+            if i + 1 < len(linhas):
+                dados['nome'] = linhas[i + 1]
+
+            break
+
+
+    # CPF parcialmente oculto
+    cpf = re.search(
+        r"\*{3}\.(\d{3})\.(\d{3})-\*{2}",
+        texto
+    )
+
+    if cpf:
+        cpf_miolo = cpf.group(1) + cpf.group(2)
+    else:
+        # Fallback: segundo bloco com 2 dígitos e 1 asterisco
+        cpf = re.search(
+            r"\*{3}\.(\d{3})\.(\d{2})\*-\*{2}",
+            texto
+        )
+
+        if cpf:
+           dados["cpf_miolo"] = cpf.group(1) + cpf.group(2)
+
+
+    if dados['nome'] == None:
+        dados['nome'] = "Nome não informado no comprovante."
+
+    return dados
+
+
+@router.post("/parse_leitora/comp")
+async def parse_leitora_comp(
+    pdf: UploadFile = File(...),
+    usuario=Depends(exigir_usuario_logado),
+):
+    conteudo_pdf = await ler_pdf(pdf)
+    texto = extrair_texto(BytesIO(conteudo_pdf))
+
+    if not texto.strip():
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Não foi possível extrair texto deste PDF. "
+                "Se ele for digitalizado como imagem, será necessário OCR."
+            ),
+        )
+
+    return JSONResponse(
+        content=extrair_comp(texto)
     )

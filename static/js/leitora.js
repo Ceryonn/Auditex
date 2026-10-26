@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("leitoraForm");
 
@@ -24,6 +23,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const closeTextButton = document.getElementById("closeTextButton");
     const textPanel = document.getElementById("textPanel");
     const extractedText = document.getElementById("extractedText");
+
+
+    const parcelasCount = document.getElementById("parcelasCount");
+    const parcelasEmpty = document.getElementById("parcelasEmpty");
+    const parcelasTableWrapper = document.getElementById("parcelasTableWrapper");
+    const parcelasTableBody = document.getElementById("parcelasTableBody");
 
     const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
@@ -117,6 +122,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         extractedText.textContent = "";
 
+        fields.valorLiberado.textContent = "—";
+        fields.valorTotal.textContent = "—";
+
+
         resultBadge.className =
             "auditex-badge auditex-badge-neutral";
 
@@ -201,17 +210,94 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+
+
+    
+    function formatCurrencyBRL(value) {
+        if (value === null || value === undefined || value === "") {
+            return "—";
+        }
+
+        const text = String(value).trim();
+
+        // Converte valores extraídos no formato brasileiro.
+        if (/^-?\d{1,3}(?:\.\d{3})*,\d{2}$/.test(text) ||
+            /^-?\d+,\d{2}$/.test(text)) {
+            const numero = Number(
+                text.replace(/\./g, "").replace(",", ".")
+            );
+
+            return new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL"
+            }).format(numero);
+        }
+
+        // Aceita números que já chegam como number.
+        if (typeof value === "number" && Number.isFinite(value)) {
+            return new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL"
+            }).format(value);
+        }
+
+        return text;
+    }
+
+    function displayParcelas(parcelas) {
+        const lista = Array.isArray(parcelas) ? parcelas : [];
+
+        parcelasTableBody.replaceChildren();
+
+        parcelasCount.textContent =
+            `${lista.length} ${lista.length === 1 ? "parcela" : "parcelas"}`;
+
+        parcelasEmpty.hidden = lista.length > 0;
+        parcelasTableWrapper.hidden = lista.length === 0;
+
+        for (const parcela of lista) {
+            const tr = document.createElement("tr");
+
+            const valores = [
+                parcela.parcela ?? "—",
+                parcela.vencimento ?? "—",
+                parcela.prazo ?? "—",
+                formatCurrencyBRL(parcela.valor_parcela),
+                formatCurrencyBRL(parcela.descontos),
+                formatCurrencyBRL(parcela.divida)
+            ];
+
+            valores.forEach((valor, index) => {
+                const td = document.createElement("td");
+                td.textContent = String(valor);
+
+                if (index >= 2) {
+                    td.classList.add("text-end");
+                }
+
+                tr.appendChild(td);
+            });
+
+            parcelasTableBody.appendChild(tr);
+        }
+    }
+
+
     function displayResults(data) {
+
+        displayParcelas(data.parcelas);
+
         fields.nome.value = data.nome ?? "";
         fields.cpf.value = data.cpf ?? "";
         fields.rg.value = data.rg ?? "";
         fields.kg.value = data.kg ?? "";
 
-        fields.valorLiberado.value =
-            formatValue(data["valor liberado"]);
+        fields.valorLiberado.textContent =
+            formatValue(data["valor liberado"]) || "—";
 
-        fields.valorTotal.value =
-            formatValue(data["valor total"]);
+        fields.valorTotal.textContent =
+            formatValue(data["valor total"]) || "—";
+
 
         resultsEmpty.hidden = true;
         resultsContent.hidden = false;
@@ -343,6 +429,23 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             displayResults(data);
+                console.log("JSON recebido da API:", data);
+                console.log("Valor liberado:", data["valor liberado"]);
+                console.log("Valor total:", data["valor total"]);
+
+                fields.nome.value = data.nome ?? "";
+                fields.cpf.value = data.cpf ?? "";
+                fields.rg.value = data.rg ?? "";
+                fields.kg.value = data.kg ?? "";
+
+
+                fields.valorLiberado.textContent =
+                        formatValue(data["valor liberado"]) || "—";
+
+                    fields.valorTotal.textContent =
+                        formatValue(data["valor total"]) || "—";
+
+
 
             const hasData = Object.values(data).some(
                 value =>
