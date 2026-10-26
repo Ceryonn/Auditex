@@ -1,0 +1,215 @@
+
+.auditoria-page {
+    color: #1e293b;
+}
+
+.auditoria-eyebrow {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+}
+
+.auditoria-header-icon {
+    width: 58px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 1.8rem;
+}
+
+.auditoria-stat-card {
+    border-radius: 12px;
+    transition: box-shadow 0.2s ease;
+}
+
+.auditoria-stat-card:hover {
+    box-shadow: 0 0.5rem 1.5rem rgba(15, 23, 42, 0.08) !important;
+}
+
+.auditoria-stat-icon {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 1.35rem;
+}
+
+.stat-blue {
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+.stat-green {
+    color: #15803d;
+    background: #f0fdf4;
+}
+
+.stat-orange {
+    color: #c2410c;
+    background: #fff7ed;
+}
+
+.auditoria-page .card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.auditoria-page .card-header,
+.auditoria-page .card-footer {
+    border-color: #e9edf3;
+}
+
+.auditoria-page .form-control,
+.auditoria-page .form-select,
+.auditoria-page .input-group-text {
+    min-height: 42px;
+    border-color: #dbe2ea;
+}
+
+.auditoria-page .form-control:focus,
+.auditoria-page .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
+}
+
+.auditoria-search .input-group-text {
+    color: #64748b;
+}
+
+.auditoria-search .form-control {
+    border-left: 0;
+}
+
+.auditoria-search .input-group-text {
+    border-right: 0;
+}
+
+.auditoria-table-wrapper {
+    min-height: 180px;
+}
+
+#tabelaAuditoria {
+    font-size: 0.84rem;
+}
+
+#tabelaAuditoria thead th {
+    padding: 15px 14px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.035em;
+    white-space: nowrap;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+#tabelaAuditoria tbody td {
+    padding: 14px;
+    border-color: #eef2f6;
+    vertical-align: middle;
+}
+
+#tabelaAuditoria tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.auditoria-cell-name {
+    min-width: 180px;
+    max-width: 260px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-weight: 600;
+    color: #334155;
+}
+
+.auditoria-cell-text {
+    min-width: 120px;
+    max-width: 240px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.auditoria-cell-document {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.auditoria-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.auditoria-badge-success {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.auditoria-badge-warning {
+    color: #9a3412;
+    background: #ffedd5;
+}
+
+.auditoria-badge-neutral {
+    color: #475569;
+    background: #f1f5f9;
+}
+
+.auditoria-empty {
+    padding: 55px 20px !important;
+    text-align: center;
+    color: #64748b;
+}
+
+.auditoria-empty i {
+    display: block;
+    margin-bottom: 12px;
+    color: #94a3b8;
+    font-size: 2rem;
+}
+
+#paginacaoAuditoria .page-link {
+    cursor: pointer;
+}
+
+#paginacaoAuditoria .page-item.disabled .page-link {
+    cursor: not-allowed;
+}
+
+@media (max-width: 767.98px) {
+    .auditoria-page {
+        padding-top: 1.25rem !important;
+    }
+
+    .auditoria-header-icon {
+        display: none;
+    }
+
+    .auditoria-page .card-body {
+        padding: 1rem !important;
+    }
+
+    .auditoria-page .card-header,
+    .auditoria-page .card-footer {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    #paginacaoAuditoria {
+        flex-wrap: wrap;
+    }
+}

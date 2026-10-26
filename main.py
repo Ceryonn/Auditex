@@ -6,7 +6,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import inspect, text
 
-from rotas import auth, users, registro, admin, leitora
+from rotas import auth, users, registro, admin, leitora, auditoria
 from database.database import Base, engine, obter_db
 from models import User
 from rotas.auth import obter_usuario_logado_web
@@ -56,6 +56,8 @@ app.include_router(users.router)
 app.include_router(registro.router)
 app.include_router(admin.router)
 app.include_router(leitora.router)
+app.include_router(auditoria.router)
+
 
 templates = Jinja2Templates(
     directory="templates"

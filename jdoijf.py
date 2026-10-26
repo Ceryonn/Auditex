@@ -1,39 +1,83 @@
-"""
+'''
 import sqlite3
 
-conn = sqlite3.connect("users.db")
+conn = sqlite3.connect("clientes.db")
 
 try:
     cursor = conn.cursor()
 
-    cursor.execute(""" """
-        UPDATE users
-        SET nivel = ?
-        WHERE id = ?
-   , ("admin", 1))
+    cursor.execute("""
+        ALTER TABLE clientes
+        ADD COLUMN auditado TEXT NOT NULL DEFAULT 'não'
+        CHECK (auditado IN ('sim', 'não'))
+    """)
+
+    cursor.execute("""
+        ALTER TABLE clientes
+        ADD COLUMN "status final" TEXT
+        CHECK ("status final" IN (
+            'aprovado',
+            'pendenciado',
+            'reprovado'
+        ))
+    """)
+
+    cursor.execute("""
+        ALTER TABLE clientes
+        ADD COLUMN motivo TEXT
+    """)
 
     conn.commit()
-    print(f"{cursor.rowcount} registro(s) atualizado(s).")
+    print("Colunas de auditoria adicionadas com sucesso!")
+
+except sqlite3.Error as erro:
+    conn.rollback()
+    print(f"Erro: {erro}")
 
 finally:
     conn.close()
 
-"""
+    '''
+'''
+
+import sqlite3
+
+conn = sqlite3.connect("clientes.db")
+
+try:
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT name
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name NOT LIKE 'sqlite_%'
+    """)
+
+    tabelas = cursor.fetchall()
+
+    for (tabela,) in tabelas:
+        print(f"\nTabela: {tabela}")
+
+        cursor.execute(f'PRAGMA table_info("{tabela}")')
+
+        colunas = cursor.fetchall()
+
+        for coluna in colunas:
+            print(f" - {coluna[1]}")
+
+finally:
+    conn.close()
+
+'''
 
 
-from rotas.leitora import extrair_parcelas_ccb
 
-texto_teste = """
-Parc. Dt. Vcto Prazo
-Parcela Descontos Dívida
-001 01/12/2025 172 52,44 16,49 35,95
-002 01/12/2026 537 44,59 20,38 24,21
-003 01/12/2027 902 50,53 28,45 22,08
-004 01/12/2028 1268 40,42 26,21 14,21
-005 01/12/2029 1633 48,50 34,77 13,73
-"""
+import sqlite3
 
-print(extrair_parcelas_ccb(texto_teste))
+con = sqlite3.connect("clientes.db")
 
+for coluna in con.execute("PRAGMA table_info(clientes)"):
+    print(coluna[1], "-", coluna[2])
 
-print(extrair_parcelas_ccb(texto_teste))
+con.close()

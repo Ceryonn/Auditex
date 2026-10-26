@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block titulo %}Central de Auditoria | Auditex{% endblock %}
+
+{% block nav_auditorias %}active{% endblock %}
+
+{% block breadcrumb %}
+<span class="breadcrumb-current">
+    <i class="bi bi-clipboard2-check me-2"></i>
+    Central de Auditoria
+</span>
+{% endblock %}
+
+{% block estilos %}
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', path='/css/auditoria.css') }}"
+>
+{% endblock %}
+
+{% block conteudo %}
+
+<div class="container-fluid py-4 auditoria-page">
+
+    <!-- CABEÇALHO -->
+    <div class="d-flex flex-wrap justify-content-between
+                align-items-center gap-3 mb-4">
+
+        <div>
+            <div class="auditoria-eyebrow mb-2">
+                <i class="bi bi-shield-check me-1"></i>
+                AUDITEX / CONTROLE OPERACIONAL
+            </div>
+
+            <h1 class="h3 fw-bold mb-2">
+                Central de Auditoria
+            </h1>
+
+            <p class="text-secondary mb-0">
+                Localize operações, consulte documentos e acompanhe
+                os resultados das auditorias.
+            </p>
+        </div>
+
+        <div class="auditoria-header-icon">
+            <i class="bi bi-clipboard2-check"></i>
+        </div>
+
+    </div>
+
+    <!-- INDICADORES -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card border-0 shadow-sm auditoria-stat-card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+
+                    <div class="auditoria-stat-icon stat-blue">
+                        <i class="bi bi-files"></i>
+                    </div>
+
+                    <div>
+                        <div class="text-secondary small">
+                            Registros encontrados
+                        </div>
+
+                        <div
+                            class="h4 fw-bold mb-0"
+                            id="totalRegistros"
+                            aria-live="polite"
+                        >—</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card border-0 shadow-sm auditoria-stat-card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+
+                    <div class="auditoria-stat-icon stat-green">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+
+                    <div>
+                        <div class="text-secondary small">
+                            Auditados na consulta
+                        </div>
+
+                        <div
+                            class="h4 fw-bold mb-0"
+                            id="totalAuditados"
+                            aria-live="polite"
+                        >—</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card border-0 shadow-sm auditoria-stat-card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+
+                    <div class="auditoria-stat-icon stat-orange">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+
+                    <div>
+                        <div class="text-secondary small">
+                            Pendentes na consulta
+                        </div>
+
+                        <div
+                            class="h4 fw-bold mb-0"
+                            id="totalPendentes"
+                            aria-live="polite"
+                        >—</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PAINEL DE CONSULTA -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white border-bottom py-3 px-4">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-funnel text-primary"></i>
+
+                <h2 class="h6 fw-bold mb-0">
+                    Pesquisa e filtros
+                </h2>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+
+            <div class="row g-3 align-items-end">
+
+                <!-- BUSCA -->
+                <div class="col-12 col-lg-7">
+
+                    <label
+                        for="buscaAuditoria"
+                        class="form-label fw-semibold small"
+                    >
+                        Buscar registro
+                    </label>
+
+                    <div class="input-group auditoria-search">
+
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-search"></i>
+                        </span>
+
+                        <input
+                            type="search"
+                            id="buscaAuditoria"
+                            class="form-control"
+                            placeholder="Digite CPF, CCB, documento ou nome"
+                            maxlength="200"
+                            autocomplete="off"
+                        >
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            id="limparBusca"
+                            title="Limpar pesquisa"
+                            aria-label="Limpar pesquisa"
+                        >
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+
+                    </div>
+
+                    <div class="form-text">
+                        A pesquisa aceita correspondências parciais.
+                    </div>
+
+                </div>
+
+                <!-- OPERAÇÃO -->
+                <div class="col-12 col-lg-3">
+
+                    <label
+                        for="filtroOperacao"
+                        class="form-label fw-semibold small"
+                    >
+                        Operação
+                    </label>
+
+                    <select
+                        id="filtroOperacao"
+                        class="form-select"
+                    >
+                        <option value="">Todas as operações</option>
+                    </select>
+
+                </div>
+
+                <!-- ATUALIZAR -->
+                <div class="col-12 col-lg-2 d-grid">
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        id="atualizarAuditoria"
+                    >
+                        <i class="bi bi-arrow-clockwise me-2"></i>
+                        Atualizar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TABELA -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white px-4 py-3">
+
+            <div class="d-flex flex-wrap justify-content-between
+                        align-items-center gap-2">
+
+                <div>
+                    <h2 class="h6 fw-bold mb-1">
+                        Registros para auditoria
+                    </h2>
+
+                    <div
+                        class="small text-secondary"
+                        id="resumoRegistros"
+                        aria-live="polite"
+                    >
+                        Preparando consulta...
+                    </div>
+                </div>
+
+                <span
+                    class="badge text-bg-light border"
+                    id="paginaAtual"
+                >
+                    Página 1
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="table-responsive auditoria-table-wrapper">
+
+            <table
+                class="table table-hover align-middle mb-0"
+                id="tabelaAuditoria"
+            >
+
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Originador</th>
+                        <th scope="col">Fundo</th>
+                        <th scope="col">Operação</th>
+                        <th scope="col">Cessão</th>
+                        <th scope="col">CCB</th>
+                        <th scope="col">Documento</th>
+                        <th scope="col">Nome</th>
+                        <th clas="text-center scope="col">Lastro</th>
+                        <th scope="col">Auditado</th>
+                        <th scope="col">Status final</th>
+                        <th scope="col">Motivo</th>
+                    </tr>
+                </thead>
+
+                <tbody id="corpoAuditoria">
+
+                    <tr>
+                        <td colspan="12" class="text-center py-5">
+
+                            <div
+                                class="spinner-border spinner-border-sm
+                                       text-primary me-2"
+                                role="status"
+                            >
+                                <span class="visually-hidden">
+                                    Carregando
+                                </span>
+                            </div>
+
+                            <span class="text-secondary">
+                                Carregando registros...
+                            </span>
+
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- RODAPÉ DA TABELA -->
+        <div class="card-footer bg-white px-4 py-3">
+
+            <div class="d-flex flex-wrap justify-content-between
+                        align-items-center gap-3">
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <label
+                        for="limitePagina"
+                        class="small text-secondary"
+                    >
+                        Registros por página
+                    </label>
+
+                    <select
+                        id="limitePagina"
+                        class="form-select form-select-sm"
+                        style="width: 85px"
+                    >
+                        <option value="25">25</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                    </select>
+
+                </div>
+
+                <nav aria-label="Paginação da auditoria">
+
+                    <ul
+                        class="pagination pagination-sm mb-0"
+                        id="paginacaoAuditoria"
+                    >
+
+                        <li class="page-item disabled">
+                            <button
+                                type="button"
+                                class="page-link"
+                                disabled
+                            >
+                                Anterior
+                            </button>
+                        </li>
+
+                        <li class="page-item disabled">
+                            <button
+                                type="button"
+                                class="page-link"
+                                disabled
+                            >
+                                Próxima
+                            </button>
+                        </li>
+
+                    </ul>
+
+                </nav>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- INFORMAÇÃO -->
+    <div class="small text-secondary mt-3">
+        <i class="bi bi-info-circle me-1"></i>
+
+        Esta tela é destinada à consulta dos registros.
+        O download do lastro disponibiliza os arquivos vinculados
+        à operação, sem alterar os dados da auditoria.
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script
+    src="{{ url_for('static', path='/js/auditoria.js') }}"
+></script>
+{% endblock %}
