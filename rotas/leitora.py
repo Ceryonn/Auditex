@@ -1,6 +1,7 @@
 from io import BytesIO
 from html import escape
 import re
+import logging
 
 import pdfplumber
 
@@ -19,13 +20,48 @@ from sqlalchemy.orm import Session
 
 from database.database import obter_db
 from rotas.auth import obter_usuario_logado_web
+from rotas.auditoria import registrar_evento_auditoria
 
 
 router = APIRouter(tags=["Leitora"])
-
 templates = Jinja2Templates(directory="templates")
-
 MAX_FILE_SIZE = 15 * 1024 * 1024
+
+logger = logging.getLogger(__name__)
+
+
+# ============================================================
+# FUNÇÃO AUXILIAR DE LOG
+# ============================================================
+
+def registrar_evento_leitora(
+    request: Request,
+    usuario,
+    acao: str,
+    *,
+    resultado: str = "sucesso",
+    motivo: str | None = None,
+    detalhes: dict | None = None,
+):
+    informacoes = {
+        "resultado": resultado,
+        "metodo": request.method,
+        "recurso": request.url.path,
+    }
+
+    if motivo:
+        informacoes["motivo"] = motivo
+
+    if detalhes:
+        informacoes.update(detalhes)
+
+    registrar_evento_auditoria(
+        usuario=usuario,
+        request=request,
+        acao=acao,
+        entidade="leitora",
+        detalhes=informacoes,
+    )
 
 
 # ============================================================
@@ -37,6 +73,14 @@ def exigir_usuario_logado(
     usuario = obter_usuario_logado_web(request, db)
 
     if usuario is None:
+        registrar_evento_leitora(
+            request,
+            None,
+            "FALHA_AUTENTICACAO_LEITORA",
+            resultado="negado",
+            motivo="sessao_invalida_ou_expirada",
+        )
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Sessão inválida ou expirada. Faça login novamente.",
@@ -125,13 +169,10 @@ def normalizar_valor(valor):
 
 # ============================================================
 
-
 def extrair_dados_ccb(texto):
-    # Normaliza espaços sem remover as quebras de linha originais.
     texto = texto.replace("\xa0", " ")
 
     # RG
-
     rg = None
 
     match = re.search(
@@ -144,7 +185,6 @@ def extrair_dados_ccb(texto):
         rg = limpar_rg(match.group(1))
 
     # CPF
-
     cpf = None
 
     match = re.search(
@@ -171,7 +211,6 @@ def extrair_dados_ccb(texto):
         cpf = limpar_cpf(match.group(1))
 
     # NÚMERO KG
-
     kg = None
 
     match = re.search(
@@ -183,9 +222,7 @@ def extrair_dados_ccb(texto):
     if match:
         kg = match.group(1).strip()
 
-
     # NOME
-
     nome = None
 
     match = re.search(
@@ -197,12 +234,9 @@ def extrair_dados_ccb(texto):
     if match:
         nome = match.group(1).strip()
 
-
-
     # VALOR LIBERADO AO CLIENTE
     valor_lib = None
 
-    # Modelo antigo: valor precedido por a.m. R$
     match = re.search(
         r'a\.m\.\s*R\$\s*([\d.]+,\d{2})',
         texto,
@@ -212,9 +246,6 @@ def extrair_dados_ccb(texto):
     if match:
         valor_lib = match.group(1).strip()
 
-    # Modelo em que os dois valores aparecem na mesma linha
-    # Valor Financiado = R$ 295,98
-    # Valor Liberado ao Cliente = R$ 127,77
     if not valor_lib:
         match = re.search(
             r'Valor\s+Financiado\s+'
@@ -230,7 +261,6 @@ def extrair_dados_ccb(texto):
         if match:
             valor_lib = match.group(2).strip()
 
-    # Modelo com rótulos e valores separados por quebras de linha
     if not valor_lib:
         match = re.search(
             r'Valor\s+Financiado\s+'
@@ -246,8 +276,6 @@ def extrair_dados_ccb(texto):
         if match:
             valor_lib = match.group(2).strip()
 
-    # Alternativa mais flexível para PDFs cuja extração
-    # reorganiza os rótulos e os valores.
     if not valor_lib:
         match = re.search(
             r'Valor\s+Financiado.{0,200}?'
@@ -260,7 +288,6 @@ def extrair_dados_ccb(texto):
         if match:
             valor_lib = match.group(2).strip()
 
-    # Fallback do modelo antigo
     if not valor_lib:
         match = re.search(
             r'Valor\s+Liberado\s+ao\s+Cliente'
@@ -272,12 +299,9 @@ def extrair_dados_ccb(texto):
         if match:
             valor_lib = match.group(1).strip()
 
-
     # VALOR TOTAL DA DÍVIDA
     vlrtccb = None
 
-    # Modelo antigo e modelo em que o rótulo e o valor
-    # aparecem em linhas diferentes.
     match = re.search(
         r'Valor\s+Total\s+da\s+D[ií]vida\s*:?\s*'
         r'(?:Data\s+de\s+Emiss[aã]o\s*:?\s*)?'
@@ -290,14 +314,12 @@ def extrair_dados_ccb(texto):
 
     if match:
         valor_texto = match.group(1)
-
         vlrtccb = float(
             valor_texto.replace(".", "").replace(",", ".")
         )
     else:
         vlrtccb = "Valor não encontrado."
-        
-        
+
     return {
         "rg": rg,
         "cpf": cpf,
@@ -309,8 +331,8 @@ def extrair_dados_ccb(texto):
     }
 
 
-
-
+# ============================================================
+# PÁGINAS DA LEITORA
 # ============================================================
 
 @router.get("/leitora", response_class=HTMLResponse)
@@ -318,6 +340,10 @@ async def front_leitora(
     request: Request,
     usuario=Depends(exigir_usuario_logado),
 ):
+    registrar_evento_leitora(
+        request, usuario, "ACESSAR_LEITORA"
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="leitora.html",
@@ -327,11 +353,16 @@ async def front_leitora(
         },
     )
 
+
 @router.get("/leitora/ccb", response_class=HTMLResponse)
 async def pagina_leitora(
     request: Request,
     usuario=Depends(exigir_usuario_logado),
 ):
+    registrar_evento_leitora(
+        request, usuario, "ACESSAR_LEITORA_CCB"
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="leitoraccb.html",
@@ -347,9 +378,13 @@ async def pagina_leitora_comp(
     request: Request,
     usuario=Depends(exigir_usuario_logado),
 ):
+    registrar_evento_leitora(
+        request, usuario, "ACESSAR_LEITORA_COMPROVANTES"
+    )
+
     return templates.TemplateResponse(
         request=request,
-        name="leitoracomp.html",
+        name="leitora comp.html",
         context={
             "usuario_logado": usuario,
             "messages": [],
@@ -357,6 +392,9 @@ async def pagina_leitora_comp(
     )
 
 
+# ============================================================
+# EXTRAÇÃO DE PARCELAS
+# ============================================================
 
 def extrair_parcelas_ccb(texto: str) -> list[dict]:
     parcelas = []
@@ -403,51 +441,128 @@ def extrair_parcelas_ccb(texto: str) -> list[dict]:
 
     return parcelas
 
-
-
+# ============================================================
+# LEITURA GERAL DO PDF
 # ============================================================
 
 @router.post("/leitora/nova", response_class=HTMLResponse)
 async def leitora_geral(
+    request: Request,
     pdf: UploadFile = File(...),
     usuario=Depends(exigir_usuario_logado),
 ):
-    conteudo_pdf = await ler_pdf(pdf)
-    texto = extrair_texto(BytesIO(conteudo_pdf))
+    try:
+        conteudo_pdf = await ler_pdf(pdf)
+        texto = extrair_texto(BytesIO(conteudo_pdf))
 
-    return HTMLResponse(
-        content=f"<pre>{escape(texto)}</pre>"
-    )
+        registrar_evento_leitora(
+            request,
+            usuario,
+            "LER_PDF_GERAL",
+            detalhes={
+                "tamanho_bytes": len(conteudo_pdf),
+                "texto_extraido": bool(texto.strip()),
+            },
+        )
 
+        return HTMLResponse(
+            content=f"<pre>{escape(texto)}</pre>"
+        )
+
+    except HTTPException as exc:
+        registrar_evento_leitora(
+            request,
+            usuario,
+            "FALHA_LEITURA_PDF_GERAL",
+            resultado="falha",
+            detalhes={
+                "status_http": exc.status_code,
+            },
+        )
+        raise
+
+    except Exception:
+        logger.exception(
+            "Erro inesperado na leitura geral de PDF."
+        )
+
+        registrar_evento_leitora(
+            request,
+            usuario,
+            "ERRO_LEITURA_PDF_GERAL",
+            resultado="erro",
+            motivo="erro_interno",
+        )
+        raise
+
+
+# ============================================================
+# EXTRAÇÃO DOS DADOS DA CCB
 # ============================================================
 
 @router.post("/parse_leitora")
 async def parse_leitora(
+    request: Request,
     pdf: UploadFile = File(...),
     usuario=Depends(exigir_usuario_logado),
 ):
-    conteudo_pdf = await ler_pdf(pdf)
-    texto = extrair_texto(BytesIO(conteudo_pdf))
+    try:
+        conteudo_pdf = await ler_pdf(pdf)
+        texto = extrair_texto(BytesIO(conteudo_pdf))
 
-    if not texto.strip():
-        raise HTTPException(
-            status_code=422,
-            detail=(
-                "Não foi possível extrair texto deste PDF. "
-                "Se ele for digitalizado como imagem, será necessário OCR."
-            ),
+        if not texto.strip():
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    "Não foi possível extrair texto deste PDF. "
+                    "Se ele for digitalizado como imagem, será necessário OCR."
+                ),
+            )
+
+        dados = extrair_dados_ccb(texto)
+
+        registrar_evento_leitora(
+            request,
+            usuario,
+            "EXTRAIR_DADOS_CCB",
+            detalhes={
+                "tamanho_bytes": len(conteudo_pdf),
+                "quantidade_parcelas": len(dados["parcelas"]),
+            },
         )
 
-    return JSONResponse(
-        content=extrair_dados_ccb(texto)
-    )
+        return JSONResponse(content=dados)
+
+    except HTTPException as exc:
+        registrar_evento_leitora(
+            request,
+            usuario,
+            "FALHA_EXTRACAO_CCB",
+            resultado="falha",
+            detalhes={
+                "status_http": exc.status_code,
+            },
+        )
+        raise
+
+    except Exception:
+        logger.exception(
+            "Erro inesperado na extração de dados da CCB."
+        )
+
+        registrar_evento_leitora(
+            request,
+            usuario,
+            "ERRO_EXTRACAO_CCB",
+            resultado="erro",
+            motivo="erro_interno",
+        )
+        raise
 
 
-
-
-
-## Comprovante - Funcionalidade semana 26.10
-
+# ============================================================
+# EXTRAÇÃO DE DADOS DO COMPROVANTE
+# ============================================================
 
 def extrair_comp(texto):
 
@@ -463,7 +578,6 @@ def extrair_comp(texto):
         if l.strip()
     ]
 
-
     for i, linha in enumerate(linhas):
         if linha.lower().rstrip(":") == 'valor':
             if i + 1 < len(linhas):
@@ -476,7 +590,6 @@ def extrair_comp(texto):
                 dados['nome'] = linhas[i + 1]
 
             break
-
 
     # CPF parcialmente oculto
     cpf = re.search(
@@ -494,8 +607,7 @@ def extrair_comp(texto):
         )
 
         if cpf:
-           dados["cpf_miolo"] = cpf.group(1) + cpf.group(2)
-
+            dados["cpf_miolo"] = cpf.group(1) + cpf.group(2)
 
     if dados['nome'] == None:
         dados['nome'] = "Nome não informado no comprovante."
@@ -503,23 +615,65 @@ def extrair_comp(texto):
     return dados
 
 
+# ============================================================
+# EXTRAÇÃO DOS DADOS DO COMPROVANTE
+# ============================================================
+
 @router.post("/parse_leitora/comp")
 async def parse_leitora_comp(
+    request: Request,
     pdf: UploadFile = File(...),
     usuario=Depends(exigir_usuario_logado),
 ):
-    conteudo_pdf = await ler_pdf(pdf)
-    texto = extrair_texto(BytesIO(conteudo_pdf))
+    try:
+        conteudo_pdf = await ler_pdf(pdf)
+        texto = extrair_texto(BytesIO(conteudo_pdf))
 
-    if not texto.strip():
-        raise HTTPException(
-            status_code=422,
-            detail=(
-                "Não foi possível extrair texto deste PDF. "
-                "Se ele for digitalizado como imagem, será necessário OCR."
-            ),
+        if not texto.strip():
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    "Não foi possível extrair texto deste PDF. "
+                    "Se ele for digitalizado como imagem, será necessário OCR."
+                ),
+            )
+
+        dados = extrair_comp(texto)
+
+        registrar_evento_leitora(
+            request,
+            usuario,
+            "EXTRAIR_DADOS_COMPROVANTE",
+            detalhes={
+                "tamanho_bytes": len(conteudo_pdf),
+            },
         )
 
-    return JSONResponse(
-        content=extrair_comp(texto)
-    )
+        return JSONResponse(content=dados)
+
+    except HTTPException as exc:
+        registrar_evento_leitora(
+            request,
+            usuario,
+            "FALHA_EXTRACAO_COMPROVANTE",
+            resultado="falha",
+            detalhes={
+                "status_http": exc.status_code,
+            },
+        )
+        raise
+
+    except Exception:
+        logger.exception(
+            "Erro inesperado na extração do comprovante."
+        )
+
+        registrar_evento_leitora(
+            request,
+            usuario,
+            "ERRO_EXTRACAO_COMPROVANTE",
+            resultado="erro",
+            motivo="erro_interno",
+        )
+        raise
+    

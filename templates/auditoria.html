@@ -23,9 +23,7 @@
 <div class="container-fluid py-4 auditoria-page">
 
     <!-- CABEÇALHO -->
-    <div class="d-flex flex-wrap justify-content-between
-                align-items-center gap-3 mb-4">
-
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
             <div class="auditoria-eyebrow mb-2">
                 <i class="bi bi-shield-check me-1"></i>
@@ -45,93 +43,181 @@
         <div class="auditoria-header-icon">
             <i class="bi bi-clipboard2-check"></i>
         </div>
-
     </div>
 
-    <!-- INDICADORES -->
+    <!-- INDICADORES GLOBAIS -->
     <div class="row g-3 mb-4">
 
-        <div class="col-12 col-sm-6 col-xl-4">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm auditoria-stat-card h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-
-                    <div class="auditoria-stat-icon stat-blue">
-                        <i class="bi bi-files"></i>
+                <div class="card-body">
+                    <div class="text-secondary small">
+                        Total de registros
                     </div>
-
-                    <div>
-                        <div class="text-secondary small">
-                            Registros encontrados
-                        </div>
-
-                        <div
-                            class="h4 fw-bold mb-0"
-                            id="totalRegistros"
-                            aria-live="polite"
-                        >—</div>
-                    </div>
-
+                    <div class="h4 fw-bold mb-0" id="totalGlobal">—</div>
+                    <div class="small text-secondary">Base completa</div>
                 </div>
             </div>
         </div>
 
-        <div class="col-12 col-sm-6 col-xl-4">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm auditoria-stat-card h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-
-                    <div class="auditoria-stat-icon stat-green">
-                        <i class="bi bi-check2-circle"></i>
+                <div class="card-body">
+                    <div class="text-secondary small">
+                        Auditados no total
                     </div>
-
-                    <div>
-                        <div class="text-secondary small">
-                            Auditados na consulta
-                        </div>
-
-                        <div
-                            class="h4 fw-bold mb-0"
-                            id="totalAuditados"
-                            aria-live="polite"
-                        >—</div>
+                    <div
+                        class="h4 fw-bold text-success mb-0"
+                        id="auditadosGlobal"
+                    >—</div>
+                    <div class="small text-secondary">
+                        Auditorias concluídas
                     </div>
-
                 </div>
             </div>
         </div>
 
-        <div class="col-12 col-sm-6 col-xl-4">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm auditoria-stat-card h-100">
-                <div class="card-body d-flex align-items-center gap-3">
+                <div class="card-body">
+                    <div class="text-secondary small">
+                        Pendentes no total
+                    </div>
+                    <div
+                        class="h4 fw-bold text-warning mb-0"
+                        id="pendentesGlobal"
+                    >—</div>
+                    <div class="small text-secondary">
+                        Ainda não concluídos
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <div class="auditoria-stat-icon stat-orange">
-                        <i class="bi bi-hourglass-split"></i>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm auditoria-stat-card h-100">
+                <div class="card-body">
+                    <div class="text-secondary small">
+                        Conclusão global
+                    </div>
+                    <div class="h4 fw-bold mb-0" id="percentualGlobal">
+                        —
                     </div>
 
-                    <div>
-                        <div class="text-secondary small">
-                            Pendentes na consulta
-                        </div>
-
+                    <div class="progress mt-2" style="height: 8px">
                         <div
-                            class="h4 fw-bold mb-0"
-                            id="totalPendentes"
-                            aria-live="polite"
-                        >—</div>
+                            class="progress-bar bg-success"
+                            id="barraGlobal"
+                            role="progressbar"
+                            style="width: 0%"
+                            aria-label="Percentual global de auditorias concluídas"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="0"
+                        ></div>
                     </div>
-
                 </div>
             </div>
         </div>
 
     </div>
 
-    <!-- PAINEL DE CONSULTA -->
+    <!-- RESUMO DA CONSULTA -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <h2 class="h6 fw-bold mb-1">
+                        Resultado da consulta
+                    </h2>
+                    <div
+                        class="small text-secondary"
+                        id="resumoConsultaTitulo"
+                    >
+                        Todas as operações
+                    </div>
+                </div>
+
+                <span
+                    class="badge text-bg-light border"
+                    id="percentualConsulta"
+                >—</span>
+            </div>
+
+            <div class="row g-3 mb-3">
+
+                <div class="col-12 col-md-4">
+                    <div class="small text-secondary">
+                        Registros encontrados
+                    </div>
+                    <div class="h5 fw-bold mb-0" id="totalRegistros">
+                        —
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="small text-secondary">
+                        Auditados na consulta
+                    </div>
+                    <div
+                        class="h5 fw-bold text-success mb-0"
+                        id="totalAuditados"
+                    >—</div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="small text-secondary">
+                        Pendentes na consulta
+                    </div>
+                    <div
+                        class="h5 fw-bold text-warning mb-0"
+                        id="totalPendentes"
+                    >—</div>
+                </div>
+
+            </div>
+
+            <div
+                class="progress mb-2"
+                style="height: 12px"
+                role="progressbar"
+                id="progressoConsulta"
+                aria-label="Progresso das auditorias da consulta"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+            >
+                <div
+                    class="progress-bar bg-success"
+                    id="barraConsulta"
+                    style="width: 0%"
+                ></div>
+            </div>
+
+            <div class="d-flex justify-content-between gap-2">
+                <span
+                    class="small text-secondary"
+                    id="legendaProgressoConsulta"
+                >
+                    Aguardando consulta...
+                </span>
+
+                <span
+                    class="small fw-semibold"
+                    id="percentualConsultaLegenda"
+                >0%</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PESQUISA E FILTROS -->
     <div class="card border-0 shadow-sm mb-4">
 
         <div class="card-header bg-white border-bottom py-3 px-4">
             <div class="d-flex align-items-center gap-2">
                 <i class="bi bi-funnel text-primary"></i>
-
                 <h2 class="h6 fw-bold mb-0">
                     Pesquisa e filtros
                 </h2>
@@ -139,12 +225,10 @@
         </div>
 
         <div class="card-body p-4">
-
             <div class="row g-3 align-items-end">
 
                 <!-- BUSCA -->
                 <div class="col-12 col-lg-7">
-
                     <label
                         for="buscaAuditoria"
                         class="form-label fw-semibold small"
@@ -153,7 +237,6 @@
                     </label>
 
                     <div class="input-group auditoria-search">
-
                         <span class="input-group-text bg-white">
                             <i class="bi bi-search"></i>
                         </span>
@@ -176,18 +259,15 @@
                         >
                             <i class="bi bi-x-lg"></i>
                         </button>
-
                     </div>
 
                     <div class="form-text">
                         A pesquisa aceita correspondências parciais.
                     </div>
-
                 </div>
 
                 <!-- OPERAÇÃO -->
                 <div class="col-12 col-lg-3">
-
                     <label
                         for="filtroOperacao"
                         class="form-label fw-semibold small"
@@ -201,12 +281,10 @@
                     >
                         <option value="">Todas as operações</option>
                     </select>
-
                 </div>
 
                 <!-- ATUALIZAR -->
                 <div class="col-12 col-lg-2 d-grid">
-
                     <button
                         type="button"
                         class="btn btn-primary"
@@ -215,22 +293,17 @@
                         <i class="bi bi-arrow-clockwise me-2"></i>
                         Atualizar
                     </button>
-
                 </div>
 
             </div>
-
         </div>
-
     </div>
 
-    <!-- TABELA -->
+    <!-- TABELA DE REGISTROS -->
     <div class="card border-0 shadow-sm">
 
         <div class="card-header bg-white px-4 py-3">
-
-            <div class="d-flex flex-wrap justify-content-between
-                        align-items-center gap-2">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
 
                 <div>
                     <h2 class="h6 fw-bold mb-1">
@@ -254,41 +327,34 @@
                 </span>
 
             </div>
-
         </div>
 
         <div class="table-responsive auditoria-table-wrapper">
-
             <table
                 class="table table-hover align-middle mb-0"
                 id="tabelaAuditoria"
             >
-
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
                         <th scope="col">Originador</th>
-                        <th scope="col">Fundo</th>
-                        <th scope="col">Operação</th>
-                        <th scope="col">Cessão</th>
                         <th scope="col">CCB</th>
                         <th scope="col">Documento</th>
                         <th scope="col">Nome</th>
-                        <th clas="text-center scope="col">Lastro</th>
+                        <th scope="col" class="text-center">Lastro</th>
                         <th scope="col">Auditado</th>
                         <th scope="col">Status final</th>
-                        <th scope="col">Motivo</th>
+                        <th scope="col">Motivo / observações</th>
+                        <th scope="col">Ações</th>
+                        <th scope="col">Última alteração</th>
                     </tr>
                 </thead>
 
                 <tbody id="corpoAuditoria">
-
                     <tr>
-                        <td colspan="12" class="text-center py-5">
-
+                        <td colspan="11" class="text-center py-5">
                             <div
-                                class="spinner-border spinner-border-sm
-                                       text-primary me-2"
+                                class="spinner-border spinner-border-sm text-primary me-2"
                                 role="status"
                             >
                                 <span class="visually-hidden">
@@ -299,24 +365,17 @@
                             <span class="text-secondary">
                                 Carregando registros...
                             </span>
-
                         </td>
                     </tr>
-
                 </tbody>
-
             </table>
-
         </div>
 
-        <!-- RODAPÉ DA TABELA -->
+        <!-- RODAPÉ E PAGINAÇÃO -->
         <div class="card-footer bg-white px-4 py-3">
-
-            <div class="d-flex flex-wrap justify-content-between
-                        align-items-center gap-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
 
                 <div class="d-flex align-items-center gap-2">
-
                     <label
                         for="limitePagina"
                         class="small text-secondary"
@@ -334,16 +393,13 @@
                         <option value="100">100</option>
                         <option value="200">200</option>
                     </select>
-
                 </div>
 
                 <nav aria-label="Paginação da auditoria">
-
                     <ul
                         class="pagination pagination-sm mb-0"
                         id="paginacaoAuditoria"
                     >
-
                         <li class="page-item disabled">
                             <button
                                 type="button"
@@ -363,24 +419,388 @@
                                 Próxima
                             </button>
                         </li>
-
                     </ul>
-
                 </nav>
 
             </div>
-
         </div>
 
     </div>
 
+<!-- MODAL DE EDIÇÃO DA AUDITORIA -->
+<div
+    class="modal fade"
+    id="modalAuditoria"
+    tabindex="-1"
+    aria-labelledby="modalAuditoriaTitulo"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable auditoria-modal-dialog">
+        <div class="modal-content border-0 shadow auditoria-modal-content">
+
+            <!-- CABEÇALHO FIXO -->
+            <div class="modal-header auditoria-modal-header">
+                <div>
+                    <h2
+                        class="modal-title fs-5 fw-bold"
+                        id="modalAuditoriaTitulo"
+                    >
+                        <i class="bi bi-clipboard2-check text-primary me-2"></i>
+                        Auditar registro
+                    </h2>
+
+                    <div
+                        class="small text-secondary"
+                        id="modalAuditoriaSubtitulo"
+                    >
+                        Consulte os dados e registre o resultado.
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Fechar"
+                ></button>
+            </div>
+
+            <!-- NAVEGAÇÃO DO MODAL -->
+            <nav
+                class="auditoria-modal-nav"
+                aria-label="Navegação da auditoria"
+            >
+                <a href="#secaoDadosRegistro" class="auditoria-modal-nav-link">
+                    <i class="bi bi-person-vcard me-1"></i>
+                    Registro
+                </a>
+
+                <a href="#secaoSituacaoAuditoria" class="auditoria-modal-nav-link">
+                    <i class="bi bi-clipboard-check me-1"></i>
+                    Situação
+                </a>
+
+                <a href="#secaoVerificacoes" class="auditoria-modal-nav-link">
+                    <i class="bi bi-list-check me-1"></i>
+                    Verificações
+                </a>
+
+                <a href="#secaoStatusFinal" class="auditoria-modal-nav-link">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Resultado
+                </a>
+
+                <a href="#secaoPendenciaDocumental" class="auditoria-modal-nav-link">
+                    <i class="bi bi-file-earmark-text me-1"></i>
+                    Pendências
+                </a>
+
+                <a href="#secaoMotivo" class="auditoria-modal-nav-link">
+                    <i class="bi bi-chat-left-text me-1"></i>
+                    Observações
+                </a>
+            </nav>
+
+            <form id="formAuditoria">
+
+                <!-- ÁREA ROLÁVEL -->
+                <div class="modal-body auditoria-modal-body">
+
+                    <!-- MENSAGENS -->
+                    <div
+                        class="alert alert-danger d-none"
+                        id="erroAuditoria"
+                        role="alert"
+                        aria-live="polite"
+                    ></div>
+
+                    <div
+                        class="alert alert-success d-none"
+                        id="sucessoAuditoria"
+                        role="status"
+                        aria-live="polite"
+                    ></div>
+
+                    <!-- DADOS DO REGISTRO -->
+                    <section
+                        id="secaoDadosRegistro"
+                        class="rounded-3 bg-light p-3 mb-4 auditoria-modal-section"
+                    >
+                        <h3 class="h6 fw-bold mb-3">
+                            <i class="bi bi-person-vcard text-primary me-2"></i>
+                            Dados do registro
+                        </h3>
+
+                        <div class="row g-3">
+
+                            <div class="col-6 col-md-2">
+                                <div class="small text-secondary">ID</div>
+                                <div class="fw-semibold" id="detalheId">—</div>
+                            </div>
+
+                            <div class="col-6 col-md-10">
+                                <div class="small text-secondary">Operação</div>
+                                <div class="fw-semibold" id="detalheOperacao">—</div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="small text-secondary">CCB</div>
+                                <div class="text-break" id="detalheCcb">—</div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="small text-secondary">Documento</div>
+                                <div class="text-break" id="detalheDocumento">—</div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="small text-secondary">Nome</div>
+                                <div class="fw-semibold text-break" id="detalheNome">—</div>
+                            </div>
+
+                            <div class="col-12">
+                                <a
+                                    href="#"
+                                    class="btn btn-outline-primary btn-sm d-none"
+                                    id="baixarLastroModal"
+                                >
+                                    <i class="bi bi-download me-1"></i>
+                                    Baixar documentos do lastro
+                                </a>
+
+                                <span
+                                    class="small text-secondary d-none"
+                                    id="lastroIndisponivel"
+                                >
+                                    Não há lastro cadastrado para este registro.
+                                </span>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <!-- SITUAÇÃO DA AUDITORIA -->
+                    <section
+                        id="secaoSituacaoAuditoria"
+                        class="mb-4 auditoria-modal-section"
+                    >
+                        <label
+                            for="auditadoInput"
+                            class="form-label fw-semibold"
+                        >
+                            Situação da auditoria
+                        </label>
+
+                        <select
+                            id="auditadoInput"
+                            class="form-select"
+                            required
+                        >
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em análise">Em análise</option>
+                            <option value="Concluído">Concluído</option>
+                        </select>
+                    </section>
+
+                    <!-- VERIFICAÇÕES -->
+                    <section
+                        id="secaoVerificacoes"
+                        class="border rounded-3 p-3 mb-4 auditoria-modal-section"
+                    >
+                        <h3 class="h6 fw-bold mb-3">
+                            <i class="bi bi-list-check text-primary me-2"></i>
+                            Verificações da auditoria
+                        </h3>
+
+                        <div class="row g-3">
+
+                            <div class="col-12 col-md-4">
+                                <label
+                                    for="cpfRegularInput"
+                                    class="form-label fw-semibold"
+                                >
+                                    CPF regular
+                                </label>
+
+                                <select
+                                    id="cpfRegularInput"
+                                    class="form-select"
+                                    required
+                                >
+                                    <option value="">Selecione</option>
+                                    <option value="Sim">Sim</option>
+                                    <option value="Não">Não</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label
+                                    for="financeiroOkInput"
+                                    class="form-label fw-semibold"
+                                >
+                                    Financeiro OK
+                                </label>
+
+                                <select
+                                    id="financeiroOkInput"
+                                    class="form-select"
+                                    required
+                                >
+                                    <option value="">Selecione</option>
+                                    <option value="Sim">Sim</option>
+                                    <option value="Não">Não</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label
+                                    for="documentosPessoaisOkInput"
+                                    class="form-label fw-semibold"
+                                >
+                                    Documentos pessoais OK
+                                </label>
+
+                                <select
+                                    id="documentosPessoaisOkInput"
+                                    class="form-select"
+                                    required
+                                >
+                                    <option value="">Selecione</option>
+                                    <option value="Sim">Sim</option>
+                                    <option value="Não">Não</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <!-- STATUS FINAL -->
+                    <section
+                        id="secaoStatusFinal"
+                        class="mb-4 auditoria-modal-section"
+                    >
+                        <label
+                            for="statusFinalInput"
+                            class="form-label fw-semibold"
+                        >
+                            Status final
+                        </label>
+
+                        <select
+                            id="statusFinalInput"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">Selecione o resultado</option>
+                            <option value="Aprovado">Aprovado</option>
+                            <option value="Reprovado">Reprovado</option>
+                            <option value="Pendente">Pendente</option>
+                        </select>
+
+                        <div class="form-text">
+                            Selecione o resultado final da análise.
+                        </div>
+                    </section>
+
+                    <!-- PENDÊNCIA DOCUMENTAL -->
+                    <section
+                        id="secaoPendenciaDocumental"
+                        class="mb-4 auditoria-modal-section"
+                    >
+                        <label
+                            for="pendenciaDocumentalInput"
+                            class="form-label fw-semibold"
+                        >
+                            Pendência documental
+                            <span class="text-secondary fw-normal">(opcional)</span>
+                        </label>
+
+                        <textarea
+                            id="pendenciaDocumentalInput"
+                            class="form-control"
+                            rows="3"
+                            maxlength="5000"
+                            placeholder="Descreva os documentos faltantes ou os problemas encontrados..."
+                        ></textarea>
+
+                        <div class="form-text">
+                            Informe os documentos ou as informações que precisam ser regularizados.
+                        </div>
+                    </section>
+
+                    <!-- MOTIVO / OBSERVAÇÕES -->
+                    <section
+                        id="secaoMotivo"
+                        class="mb-2 auditoria-modal-section"
+                    >
+                        <label
+                            for="motivoInput"
+                            class="form-label fw-semibold"
+                        >
+                            Motivo / observações
+                        </label>
+
+                        <textarea
+                            id="motivoInput"
+                            class="form-control"
+                            rows="3"
+                            maxlength="5000"
+                            placeholder="Ex.: documento ilegível, divergência de informações ou outra observação..."
+                        ></textarea>
+
+                        <div class="d-flex justify-content-between gap-2 mt-1">
+                            <div
+                                class="form-text"
+                                id="motivoAjuda"
+                            >
+                                Informe o motivo da auditoria.
+                            </div>
+
+                            <div class="form-text text-nowrap">
+                                <span id="contadorMotivo">0</span>/5000
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- RODAPÉ FIXO -->
+                <div class="modal-footer auditoria-modal-footer">
+                    <span class="small text-secondary me-auto d-none d-sm-inline">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Confira os dados antes de salvar.
+                    </span>
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="salvarAuditoria"
+                    >
+                        <i class="bi bi-check2-circle me-1"></i>
+                        Salvar auditoria
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
     <!-- INFORMAÇÃO -->
     <div class="small text-secondary mt-3">
         <i class="bi bi-info-circle me-1"></i>
-
-        Esta tela é destinada à consulta dos registros.
-        O download do lastro disponibiliza os arquivos vinculados
-        à operação, sem alterar os dados da auditoria.
+        Esta tela permite consultar os registros e realizar auditorias
+        conforme as permissões do usuário. O download do lastro disponibiliza
+        os arquivos vinculados à operação, sem alterar os dados da auditoria.
     </div>
 
 </div>

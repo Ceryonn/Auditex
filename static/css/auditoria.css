@@ -213,3 +213,86 @@
         flex-wrap: wrap;
     }
 }
+
+
+/* ========================================== MODAL DE AUDITORIA COM NAVEGAÇÃO ========================================== */
+
+#modalAuditoria .auditoria-modal-dialog { width: min(1100px, calc(100% - 24px)); max-width: 1100px; height: calc(100% - 32px); margin: 16px auto; }
+
+#modalAuditoria .auditoria-modal-content { height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+
+#modalAuditoria .auditoria-modal-header { flex: 0 0 auto; background: #fff; border-bottom: 1px solid #e9ecef; padding: 14px 20px; }
+
+#modalAuditoria .auditoria-modal-nav { display: flex; flex: 0 0 auto; gap: 6px; padding: 10px 16px; overflow-x: auto; background: #f8f9fa; border-bottom: 1px solid #e9ecef; scrollbar-width: thin; white-space: nowrap; }
+
+#modalAuditoria .auditoria-modal-nav-link { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 8px; background: #fff; color: #495057; text-decoration: none; font-size: 0.875rem; transition: background-color 0.15s ease, color 0.15s ease; }
+
+#modalAuditoria .auditoria-modal-nav-link:hover, #modalAuditoria .auditoria-modal-nav-link:focus { color: #0d6efd; background: #eaf2ff; border-color: #9ec5fe; }
+
+#modalAuditoria form { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; overflow: hidden; }
+
+#modalAuditoria .auditoria-modal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 20px; scroll-behavior: smooth; }
+
+#modalAuditoria .auditoria-modal-section { scroll-margin-top: 12px; }
+
+#modalAuditoria .auditoria-modal-footer { flex: 0 0 auto; background: #fff; border-top: 1px solid #e9ecef; padding: 12px 20px; box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.035); }
+
+#modalAuditoria .form-control, #modalAuditoria .form-select { min-height: 42px; }
+
+#modalAuditoria textarea.form-control { min-height: 90px; resize: vertical; }
+
+@media (max-width: 576px) { #modalAuditoria .auditoria-modal-dialog { width: calc(100% - 12px); height: calc(100% - 12px); margin: 6px auto; }
+
+#modalAuditoria .auditoria-modal-header {
+    padding: 12px;
+}
+
+#modalAuditoria .auditoria-modal-nav {
+    padding: 8px;
+    gap: 5px;
+}
+
+#modalAuditoria .auditoria-modal-nav-link {
+    padding: 7px 10px;
+    font-size: 0.8rem;
+}
+
+#modalAuditoria .auditoria-modal-body {
+    padding: 12px;
+}
+
+#modalAuditoria .auditoria-modal-footer {
+    padding: 10px;
+    gap: 8px;
+}
+
+#modalAuditoria .auditoria-modal-footer .btn {
+    font-size: 0.875rem;
+}
+
+
+}
+
+@media (max-height: 600px) { #modalAuditoria .auditoria-modal-dialog { height: calc(100% - 12px); margin: 6px auto; }
+
+#modalAuditoria .auditoria-modal-header {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+#modalAuditoria .auditoria-modal-nav {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+#modalAuditoria .auditoria-modal-body {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+#modalAuditoria .auditoria-modal-section {
+    margin-bottom: 16px !important;
+}
+
+
+}

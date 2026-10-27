@@ -1,0 +1,1209 @@
+{% extends "base.html" %}
+
+{% block titulo %}Logs do Sistema | Auditex{% endblock %}
+
+{% block nav_logs %}active{% endblock %}
+
+{% block estilos %}
+<style>
+    .logs-page {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .logs-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .logs-eyebrow {
+        color: #64748b;
+        font-size: .78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .09em;
+        margin-bottom: 7px;
+    }
+
+    .logs-title {
+        color: #172033;
+        font-size: 1.7rem;
+        font-weight: 750;
+        letter-spacing: -.04em;
+        margin: 0;
+    }
+
+    .logs-description {
+        color: #64748b;
+        margin: 8px 0 0;
+        font-size: .94rem;
+    }
+
+    .logs-header-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .logs-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: .88rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: .2s ease;
+    }
+
+    .logs-btn-primary {
+        background: #243b63;
+        border: 1px solid #243b63;
+        color: #fff;
+    }
+
+    .logs-btn-primary:hover {
+        background: #192d4d;
+        color: #fff;
+    }
+
+    .logs-btn-light {
+        background: #fff;
+        border: 1px solid #dbe2ea;
+        color: #334155;
+    }
+
+    .logs-btn-light:hover {
+        background: #f8fafc;
+        color: #172033;
+    }
+
+    .logs-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .logs-stat-card {
+        background: #fff;
+        border: 1px solid #e7ebf1;
+        border-radius: 14px;
+        padding: 20px;
+        min-width: 0;
+    }
+
+    .logs-stat-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .logs-stat-label {
+        color: #64748b;
+        font-size: .83rem;
+        font-weight: 600;
+    }
+
+    .logs-stat-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 39px;
+        height: 39px;
+        border-radius: 11px;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .logs-icon-blue {
+        background: #edf3ff;
+        color: #315b9b;
+    }
+
+    .logs-icon-green {
+        background: #eaf8ef;
+        color: #21834c;
+    }
+
+    .logs-icon-amber {
+        background: #fff5df;
+        color: #a96a0b;
+    }
+
+    .logs-icon-red {
+        background: #fff0f0;
+        color: #c03939;
+    }
+
+    .logs-stat-value {
+        color: #172033;
+        font-size: 1.8rem;
+        line-height: 1.2;
+        font-weight: 750;
+        letter-spacing: -.04em;
+        overflow-wrap: anywhere;
+    }
+
+    .logs-stat-caption {
+        color: #94a3b8;
+        font-size: .78rem;
+        margin-top: 7px;
+    }
+
+    .logs-panel {
+        background: #fff;
+        border: 1px solid #e7ebf1;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .logs-panel-header {
+        padding: 20px 22px;
+        border-bottom: 1px solid #edf0f4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .logs-panel-title {
+        color: #172033;
+        font-size: 1rem;
+        font-weight: 750;
+        margin: 0;
+    }
+
+    .logs-panel-subtitle {
+        color: #94a3b8;
+        font-size: .82rem;
+        margin: 5px 0 0;
+    }
+
+    .logs-filter-form {
+        padding: 20px 22px;
+        background: #fff;
+        border-bottom: 1px solid #edf0f4;
+    }
+
+    .logs-filter-grid {
+        display: grid;
+        grid-template-columns: 2fr 1.2fr 1.2fr 1.2fr;
+        gap: 14px;
+    }
+
+    .logs-filter-label {
+        display: block;
+        color: #475569;
+        font-size: .79rem;
+        font-weight: 650;
+        margin-bottom: 7px;
+    }
+
+    .logs-filter-control {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid #dbe2ea;
+        border-radius: 9px;
+        padding: 9px 11px;
+        background: #fff;
+        color: #334155;
+        font-size: .86rem;
+        outline: none;
+    }
+
+    .logs-filter-control:focus {
+        border-color: #6b8dc7;
+        box-shadow: 0 0 0 3px rgba(49, 91, 155, .10);
+    }
+
+    .logs-filter-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 9px;
+        margin-top: 16px;
+    }
+
+    .logs-table-wrap {
+        overflow-x: auto;
+        width: 100%;
+    }
+
+    .logs-table {
+        width: 100%;
+        min-width: 940px;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .logs-table thead th {
+        padding: 13px 16px;
+        color: #64748b;
+        background: #f8fafc;
+        border-bottom: 1px solid #e7ebf1;
+        font-size: .72rem;
+        font-weight: 750;
+        text-transform: uppercase;
+        letter-spacing: .045em;
+        white-space: nowrap;
+    }
+
+    .logs-table tbody td {
+        padding: 15px 16px;
+        border-bottom: 1px solid #f0f2f6;
+        color: #334155;
+        font-size: .84rem;
+        vertical-align: middle;
+    }
+
+    .logs-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .logs-table tbody tr:hover {
+        background: #fafcff;
+    }
+
+    .logs-date {
+        color: #334155;
+        font-weight: 650;
+        white-space: nowrap;
+    }
+
+    .logs-time {
+        color: #94a3b8;
+        font-size: .76rem;
+        margin-top: 4px;
+    }
+
+    .logs-user {
+        color: #243b63;
+        font-weight: 650;
+        overflow-wrap: anywhere;
+        max-width: 210px;
+    }
+
+    .logs-secondary {
+        color: #94a3b8;
+        font-size: .77rem;
+        margin-top: 4px;
+    }
+
+    .logs-action {
+        color: #334155;
+        font-weight: 650;
+        overflow-wrap: anywhere;
+    }
+
+    .logs-entity {
+        display: inline-flex;
+        padding: 5px 9px;
+        border-radius: 7px;
+        background: #f1f5f9;
+        color: #475569;
+        font-size: .75rem;
+        font-weight: 650;
+    }
+
+    .logs-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 20px;
+        padding: 5px 9px;
+        font-size: .74rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .logs-status-success {
+        background: #eaf8ef;
+        color: #21834c;
+    }
+
+    .logs-status-failure {
+        background: #fff0f0;
+        color: #b83232;
+    }
+
+    .logs-status-warning {
+        background: #fff5df;
+        color: #99620c;
+    }
+
+    .logs-status-neutral {
+        background: #eef2f7;
+        color: #536174;
+    }
+
+    .logs-ip {
+        color: #64748b;
+        font-size: .8rem;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    .logs-detail-btn {
+        border: 1px solid #dbe2ea;
+        background: #fff;
+        color: #475569;
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: .8rem;
+        font-weight: 650;
+        white-space: nowrap;
+    }
+
+    .logs-detail-btn:hover {
+        background: #f1f5f9;
+        color: #172033;
+    }
+
+    .logs-empty {
+        text-align: center;
+        padding: 55px 20px !important;
+    }
+
+    .logs-empty-icon {
+        font-size: 2rem;
+        color: #94a3b8;
+        margin-bottom: 12px;
+    }
+
+    .logs-empty-title {
+        font-weight: 750;
+        color: #334155;
+        margin-bottom: 6px;
+    }
+
+    .logs-empty-text {
+        color: #94a3b8;
+        font-size: .84rem;
+    }
+
+    .logs-panel-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 16px 22px;
+        border-top: 1px solid #edf0f4;
+        color: #64748b;
+        font-size: .82rem;
+    }
+
+    .logs-pagination {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .logs-page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 34px;
+        border: 1px solid #dbe2ea;
+        border-radius: 8px;
+        padding: 0 10px;
+        background: #fff;
+        color: #475569;
+        text-decoration: none;
+        font-size: .8rem;
+        font-weight: 650;
+    }
+
+    .logs-page-link:hover {
+        background: #f8fafc;
+        color: #172033;
+    }
+
+    .logs-page-link.disabled {
+        pointer-events: none;
+        opacity: .45;
+    }
+
+    .logs-page-link.active {
+        background: #243b63;
+        border-color: #243b63;
+        color: #fff;
+    }
+
+    .logs-json {
+        padding: 16px;
+        border-radius: 10px;
+        background: #101827;
+        color: #d7e3f4;
+        font-size: .8rem;
+        line-height: 1.65;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        max-height: 360px;
+        overflow: auto;
+        margin: 0;
+    }
+
+    .logs-modal-label {
+        color: #64748b;
+        font-size: .75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .logs-modal-value {
+        color: #243044;
+        font-size: .9rem;
+        overflow-wrap: anywhere;
+        margin-bottom: 16px;
+    }
+
+    .logs-alert {
+        padding: 13px 16px;
+        border: 1px solid #dbeafe;
+        background: #eff6ff;
+        color: #1e40af;
+        border-radius: 10px;
+        font-size: .84rem;
+    }
+
+    @media (max-width: 1100px) {
+        .logs-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .logs-filter-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 576px) {
+        .logs-title {
+            font-size: 1.4rem;
+        }
+
+        .logs-stats {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .logs-stat-card {
+            padding: 16px;
+        }
+
+        .logs-stat-top {
+            margin-bottom: 10px;
+        }
+
+        .logs-filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .logs-filter-form,
+        .logs-panel-header {
+            padding: 16px;
+        }
+
+        .logs-filter-actions {
+            justify-content: stretch;
+        }
+
+        .logs-filter-actions .logs-btn {
+            flex: 1;
+        }
+
+        .logs-panel-footer {
+            padding: 14px 16px;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block breadcrumb %}
+<span class="breadcrumb-current">
+    <i class="bi bi-journal-text me-2"></i>
+    Logs do sistema
+</span>
+{% endblock %}
+
+
+{% block conteudo %}
+<div class="logs-page">
+
+    <!-- CABEÇALHO -->
+    <section class="logs-header">
+        <div>
+            <div class="logs-eyebrow">Administração / Monitoramento</div>
+
+            <h1 class="logs-title">Trilha de auditoria</h1>
+
+            <p class="logs-description">
+                Acompanhe acessos, operações, alterações e falhas registradas no sistema.
+            </p>
+        </div>
+
+        <div class="logs-header-actions">
+            <button
+                type="button"
+                class="logs-btn logs-btn-light"
+                onclick="window.location.reload()"
+            >
+                <i class="bi bi-arrow-clockwise"></i>
+                Atualizar
+            </button>
+
+            <button
+                type="button"
+                class="logs-btn logs-btn-primary"
+                onclick="exportarLogsCSV()"
+            >
+                <i class="bi bi-download"></i>
+                Exportar CSV
+            </button>
+        </div>
+    </section>
+
+
+    <!-- INDICADORES -->
+    <section class="logs-stats">
+
+        <article class="logs-stat-card">
+            <div class="logs-stat-top">
+                <span class="logs-stat-label">Eventos encontrados</span>
+                <span class="logs-stat-icon logs-icon-blue">
+                    <i class="bi bi-journal-text"></i>
+                </span>
+            </div>
+
+            <div class="logs-stat-value">
+                {{ total|default(0) }}
+            </div>
+
+            <div class="logs-stat-caption">
+                Conforme os filtros aplicados
+            </div>
+        </article>
+
+        <article class="logs-stat-card">
+            <div class="logs-stat-top">
+                <span class="logs-stat-label">Eventos bem-sucedidos</span>
+                <span class="logs-stat-icon logs-icon-green">
+                    <i class="bi bi-check-circle"></i>
+                </span>
+            </div>
+
+            <div class="logs-stat-value">
+                {{ sucessos|default(0) }}
+            </div>
+
+            <div class="logs-stat-caption">
+                Operações concluídas
+            </div>
+        </article>
+
+        <article class="logs-stat-card">
+            <div class="logs-stat-top">
+                <span class="logs-stat-label">Falhas e bloqueios</span>
+                <span class="logs-stat-icon logs-icon-red">
+                    <i class="bi bi-shield-exclamation"></i>
+                </span>
+            </div>
+
+            <div class="logs-stat-value">
+                {{ falhas|default(0) }}
+            </div>
+
+            <div class="logs-stat-caption">
+                Eventos que exigem atenção
+            </div>
+        </article>
+
+        <article class="logs-stat-card">
+            <div class="logs-stat-top">
+                <span class="logs-stat-label">Usuários registrados</span>
+                <span class="logs-stat-icon logs-icon-amber">
+                    <i class="bi bi-people"></i>
+                </span>
+            </div>
+
+            <div class="logs-stat-value">
+                {{ usuarios_ativos|default(0) }}
+            </div>
+
+            <div class="logs-stat-caption">
+                Usuários distintos nos eventos filtrados
+            </div>
+        </article>
+
+    </section>
+
+
+    <!-- TABELA E FILTROS -->
+    <section class="logs-panel">
+
+        <div class="logs-panel-header">
+            <div>
+                <h2 class="logs-panel-title">Histórico de eventos</h2>
+                <p class="logs-panel-subtitle">
+                    Consulte quem fez o quê, quando e de onde.
+                </p>
+            </div>
+
+            <span class="logs-entity">
+                <i class="bi bi-database me-1"></i>
+                Registro de atividades
+            </span>
+        </div>
+
+
+        <!-- FILTROS -->
+        <form
+            method="get"
+            action="/logs"
+            class="logs-filter-form"
+            id="logsFilterForm"
+        >
+            <div class="logs-filter-grid">
+
+                <div>
+                    <label for="busca" class="logs-filter-label">
+                        Buscar evento
+                    </label>
+
+                    <input
+                        type="search"
+                        id="busca"
+                        name="busca"
+                        class="logs-filter-control"
+                        placeholder="Usuário, ação, entidade ou ID"
+                        value="{{ filtros.busca|default('') }}"
+                        maxlength="200"
+                    >
+                </div>
+
+                <div>
+                    <label for="acao" class="logs-filter-label">
+                        Tipo de ação
+                    </label>
+
+                    <select
+                        id="acao"
+                        name="acao"
+                        class="logs-filter-control"
+                    >
+                        <option value="">Todas as ações</option>
+
+                        {% for item in acoes %}
+                        <option
+                            value="{{ item }}"
+                            {% if filtros.acao|default('') == item %}selected{% endif %}
+                        >
+                            {{ item }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="resultado" class="logs-filter-label">
+                        Resultado
+                    </label>
+
+                    <select
+                        id="resultado"
+                        name="resultado"
+                        class="logs-filter-control"
+                    >
+                        <option value="">Todos os resultados</option>
+                        <option
+                            value="sucesso"
+                            {% if filtros.resultado|default('') == 'sucesso' %}selected{% endif %}
+                        >
+                            Sucesso
+                        </option>
+                        <option
+                            value="falha"
+                            {% if filtros.resultado|default('') == 'falha' %}selected{% endif %}
+                        >
+                            Falha
+                        </option>
+                        <option
+                            value="negado"
+                            {% if filtros.resultado|default('') == 'negado' %}selected{% endif %}
+                        >
+                            Acesso negado
+                        </option>
+                        <option
+                            value="erro"
+                            {% if filtros.resultado|default('') == 'erro' %}selected{% endif %}
+                        >
+                            Erro
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="data_inicio" class="logs-filter-label">
+                        Data inicial
+                    </label>
+
+                    <input
+                        type="date"
+                        id="data_inicio"
+                        name="data_inicio"
+                        class="logs-filter-control"
+                        value="{{ filtros.data_inicio|default('') }}"
+                    >
+                </div>
+
+                <div>
+                    <label for="data_fim" class="logs-filter-label">
+                        Data final
+                    </label>
+
+                    <input
+                        type="date"
+                        id="data_fim"
+                        name="data_fim"
+                        class="logs-filter-control"
+                        value="{{ filtros.data_fim|default('') }}"
+                    >
+                </div>
+
+                <div>
+                    <label for="email" class="logs-filter-label">
+                        E-mail do usuário
+                    </label>
+
+                    <input
+                        type="search"
+                        id="email"
+                        name="email"
+                        class="logs-filter-control"
+                        placeholder="usuario@empresa.com"
+                        value="{{ filtros.email|default('') }}"
+                        maxlength="200"
+                    >
+                </div>
+
+                <div>
+                    <label for="entidade" class="logs-filter-label">
+                        Entidade
+                    </label>
+
+                    <select
+                        id="entidade"
+                        name="entidade"
+                        class="logs-filter-control"
+                    >
+                        <option value="">Todas as entidades</option>
+
+                        {% for item in entidades %}
+                        <option
+                            value="{{ item }}"
+                            {% if filtros.entidade|default('') == item %}selected{% endif %}
+                        >
+                            {{ item }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="limit" class="logs-filter-label">
+                        Eventos por página
+                    </label>
+
+                    <select
+                        id="limit"
+                        name="limit"
+                        class="logs-filter-control"
+                    >
+                        {% for quantidade in [25, 50, 100, 200] %}
+                        <option
+                            value="{{ quantidade }}"
+                            {% if limit|default(50)|int == quantidade %}selected{% endif %}
+                        >
+                            {{ quantidade }} eventos
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="logs-filter-actions">
+                <a href="/logs" class="logs-btn logs-btn-light">
+                    <i class="bi bi-x-circle"></i>
+                    Limpar filtros
+                </a>
+
+                <button
+                    type="submit"
+                    class="logs-btn logs-btn-primary"
+                >
+                    <i class="bi bi-search"></i>
+                    Aplicar filtros
+                </button>
+            </div>
+        </form>
+
+
+        <!-- TABELA -->
+        <div class="logs-table-wrap">
+            <table class="logs-table" id="logsTable">
+                <thead>
+                    <tr>
+                        <th>Data e hora</th>
+                        <th>Usuário</th>
+                        <th>Ação</th>
+                        <th>Entidade / Registro</th>
+                        <th>Resultado</th>
+                        <th>Endereço IP</th>
+                        <th>Detalhes</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>
+                            <div class="logs-date">
+                                {{ log.data_hora|default('—') }}
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="logs-user">
+                                {{ log.email|default('Usuário desconhecido') }}
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="logs-action">
+                                {{ log.acao|default('—') }}
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="logs-entity">
+                                {{ log.entidade|default('—') }}
+                            </span>
+
+                            {% if log.registro_id %}
+                            <div class="logs-secondary">
+                                ID: {{ log.registro_id }}
+                            </div>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% set resultado = (log.resultado|default('')|lower) %}
+
+                            {% if resultado == 'sucesso' %}
+                            <span class="logs-status logs-status-success">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Sucesso
+                            </span>
+
+                            {% elif resultado in ['falha', 'erro'] %}
+                            <span class="logs-status logs-status-failure">
+                                <i class="bi bi-x-circle-fill"></i>
+                                {{ 'Falha' if resultado == 'falha' else 'Erro' }}
+                            </span>
+
+                            {% elif resultado in ['negado', 'bloqueado'] %}
+                            <span class="logs-status logs-status-warning">
+                                <i class="bi bi-shield-exclamation"></i>
+                                Negado
+                            </span>
+
+                            {% else %}
+                            <span class="logs-status logs-status-neutral">
+                                <i class="bi bi-dash-circle"></i>
+                                {{ resultado|capitalize if resultado else 'Não informado' }}
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <span class="logs-ip">
+                                {{ log.ip|default('—') }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <button
+                                type="button"
+                                class="logs-detail-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#logDetailModal"
+                                data-log-id="{{ log.id }}"
+                                data-log-data="{{ log.data_hora|default('—') }}"
+                                data-log-email="{{ log.email|default('Usuário desconhecido') }}"
+                                data-log-ip="{{ log.ip|default('—') }}"
+                                data-log-acao="{{ log.acao|default('—') }}"
+                                data-log-entidade="{{ log.entidade|default('—') }}"
+                                data-log-registro="{{ log.registro_id|default('—', true) }}"
+                                data-log-detalhes="{{ log.detalhes|default('{}')|e }}"
+                            >
+                                <i class="bi bi-eye me-1"></i>
+                                Detalhes
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="logs-empty">
+                            <div class="logs-empty-icon">
+                                <i class="bi bi-journal-x"></i>
+                            </div>
+
+                            <div class="logs-empty-title">
+                                Nenhum evento encontrado
+                            </div>
+
+                            <div class="logs-empty-text">
+                                Altere os filtros ou aguarde novas atividades do sistema.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- RODAPÉ / PAGINAÇÃO -->
+        <div class="logs-panel-footer">
+            <div>
+                Exibindo
+                <strong>{{ logs|length }}</strong>
+                de
+                <strong>{{ total|default(0) }}</strong>
+                eventos
+            </div>
+
+            <nav class="logs-pagination" aria-label="Paginação dos logs">
+                {% set pagina_atual = pagina|default(1)|int %}
+                {% set total_paginas = paginas|default(1)|int %}
+
+                <a
+                    class="logs-page-link {% if pagina_atual <= 1 %}disabled{% endif %}"
+                    href="/logs?pagina={{ pagina_atual - 1 }}&limit={{ limit|default(50) }}"
+                    aria-label="Página anterior"
+                >
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+
+                <span class="logs-page-link active">
+                    {{ pagina_atual }} / {{ total_paginas }}
+                </span>
+
+                <a
+                    class="logs-page-link {% if pagina_atual >= total_paginas %}disabled{% endif %}"
+                    href="/logs?pagina={{ pagina_atual + 1 }}&limit={{ limit|default(50) }}"
+                    aria-label="Próxima página"
+                >
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </nav>
+        </div>
+
+    </section>
+
+
+    <div class="logs-alert">
+        <i class="bi bi-info-circle me-2"></i>
+        A trilha de auditoria permite rastrear atividades registradas. A ausência de um evento
+        não garante que uma ação não ocorreu; isso depende de quais operações estão instrumentadas
+        para gerar logs.
+    </div>
+
+</div>
+
+
+<!-- MODAL DE DETALHES -->
+<div
+    class="modal fade"
+    id="logDetailModal"
+    tabindex="-1"
+    aria-labelledby="logDetailModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 rounded-4 shadow">
+
+            <div class="modal-header px-4 py-3">
+                <div>
+                    <h5 class="modal-title fw-bold" id="logDetailModalLabel">
+                        Detalhes do evento
+                    </h5>
+                    <div class="text-secondary small">
+                        Informações registradas na trilha de auditoria
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Fechar"
+                ></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="logs-modal-label">Identificador</div>
+                        <div class="logs-modal-value" id="modalLogId">—</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="logs-modal-label">Data e hora</div>
+                        <div class="logs-modal-value" id="modalLogData">—</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="logs-modal-label">Usuário</div>
+                        <div class="logs-modal-value" id="modalLogEmail">—</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="logs-modal-label">Endereço IP</div>
+                        <div class="logs-modal-value" id="modalLogIp">—</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="logs-modal-label">Ação</div>
+                        <div class="logs-modal-value" id="modalLogAcao">—</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="logs-modal-label">Entidade</div>
+                        <div class="logs-modal-value" id="modalLogEntidade">—</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="logs-modal-label">ID do registro relacionado</div>
+                        <div class="logs-modal-value" id="modalLogRegistro">—</div>
+                    </div>
+                </div>
+
+                <div class="logs-modal-label">Detalhes técnicos</div>
+                <pre class="logs-json" id="modalLogDetalhes">{}</pre>
+            </div>
+
+            <div class="modal-footer px-4 py-3">
+                <button
+                    type="button"
+                    class="logs-btn logs-btn-light"
+                    data-bs-dismiss="modal"
+                >
+                    Fechar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    // Exibe os detalhes do evento sem inserir dados do banco como HTML.
+    const logDetailModal = document.getElementById("logDetailModal");
+
+    if (logDetailModal) {
+        logDetailModal.addEventListener("show.bs.modal", function (event) {
+            const button = event.relatedTarget;
+
+            if (!button) return;
+
+            const campos = {
+                modalLogId: button.dataset.logId,
+                modalLogData: button.dataset.logData,
+                modalLogEmail: button.dataset.logEmail,
+                modalLogIp: button.dataset.logIp,
+                modalLogAcao: button.dataset.logAcao,
+                modalLogEntidade: button.dataset.logEntidade,
+                modalLogRegistro: button.dataset.logRegistro
+            };
+
+            Object.entries(campos).forEach(([id, valor]) => {
+                const elemento = document.getElementById(id);
+                if (elemento) {
+                    elemento.textContent = valor || "—";
+                }
+            });
+
+            const elementoDetalhes = document.getElementById("modalLogDetalhes");
+            const detalhesBrutos = button.dataset.logDetalhes || "{}";
+
+            try {
+                const detalhes = JSON.parse(detalhesBrutos);
+                elementoDetalhes.textContent = JSON.stringify(detalhes, null, 2);
+            } catch (erro) {
+                elementoDetalhes.textContent = detalhesBrutos;
+            }
+        });
+    }
+
+
+    // Exporta apenas os registros atualmente exibidos na tabela.
+    // Para exportar todos os resultados filtrados, implemente um endpoint no backend.
+    function exportarLogsCSV() {
+        const tabela = document.getElementById("logsTable");
+
+        if (!tabela) return;
+
+        const linhas = Array.from(tabela.querySelectorAll("tr"));
+        const csv = linhas.map((linha) => {
+            const celulas = Array.from(linha.querySelectorAll("th, td"));
+
+            return celulas
+                .filter((celula) => !celula.querySelector(".logs-detail-btn"))
+                .map((celula) => {
+                    let valor = celula.innerText.trim().replace(/\s+/g, " ");
+
+                    // Proteção contra fórmulas em planilhas.
+                    if (/^[=+\-@\t\r]/.test(valor)) {
+                        valor = "'" + valor;
+                    }
+
+                    return '"' + valor.replace(/"/g, '""') + '"';
+                })
+                .join(";");
+        });
+
+        const conteudo = "\uFEFF" + csv.join("\r\n");
+        const arquivo = new Blob([conteudo], {
+            type: "text/csv;charset=utf-8;"
+        });
+
+        const url = URL.createObjectURL(arquivo);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "auditex_logs_exibidos.csv";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        URL.revokeObjectURL(url);
+    }
+</script>
+{% endblock %}
