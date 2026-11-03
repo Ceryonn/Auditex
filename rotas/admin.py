@@ -132,7 +132,7 @@ def aprovar_usuario(
             status_code=303
         )
 
-    usuario.nivel = "operacional"
+    usuario.nivel = "auditor"
     usuario.session_version += 1
     
     db.commit()

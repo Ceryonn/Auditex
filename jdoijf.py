@@ -40,6 +40,8 @@ finally:
     '''
 '''
 
+
+
 import sqlite3
 
 conn = sqlite3.connect("clientes.db")
@@ -273,6 +275,7 @@ finally:
 
 '''
 
+'''
 
 import sqlite3
 
@@ -301,3 +304,610 @@ print(con.execute("""
 """).fetchall())
 
 con.close()
+
+'''
+
+
+
+'''
+import sqlite3
+
+conn = sqlite3.connect("clientes.db")
+
+try:
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT name
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name NOT LIKE 'sqlite_%'
+    """)
+
+    tabelas = cursor.fetchall()
+
+    for (tabela,) in tabelas:
+        print(f"\nTabela: {tabela}")
+
+        cursor.execute(f'PRAGMA table_info("{tabela}")')
+
+        colunas = cursor.fetchall()
+
+        for coluna in colunas:
+            print(f" - {coluna[1]}")
+
+finally:
+    conn.close()
+
+'''
+
+
+
+'''
+
+
+import sqlite3
+import pandas as pd
+import tkinter as tk
+
+from tkinter import filedialog, messagebox
+from pathlib import Path
+
+
+# =========================
+# CONFIGURAÇÕES
+# =========================
+
+DB_PATH = Path(__file__).parent / "clientes.db"
+TABELA = "clientes"
+
+COLUNAS_ATUALIZAR = [
+    "auditado",
+    "status final",
+    "motivo",
+    "auditoria_modificada_em",
+    "cpf_regular",
+    "financeiro_ok",
+    "documentos_pessoais_ok",
+    "pendencia_documental",
+    "responsavel",
+]
+
+
+def esta_preenchido(valor):
+    if pd.isna(valor):
+        return False
+
+    if isinstance(valor, str) and not valor.strip():
+        return False
+
+    return True
+
+
+def executar_atualizacao():
+    # Selecionar a planilha Excel
+    arquivo_excel = filedialog.askopenfilename(
+        title="Selecione a planilha Excel",
+        filetypes=[
+            ("Planilhas Excel", "*.xlsx *.xls"),
+            ("Todos os arquivos", "*.*"),
+        ],
+    )
+
+    # Usuário cancelou a seleção
+    if not arquivo_excel:
+        return
+
+    try:
+        if not DB_PATH.exists():
+            raise FileNotFoundError(
+                f"Banco de dados não encontrado:\n{DB_PATH}"
+            )
+
+        # Ler a planilha
+        df = pd.read_excel(
+            arquivo_excel,
+            dtype={"ccb": str},
+        )
+
+        # Remover espaços dos nomes das colunas
+        df.columns = df.columns.str.strip()
+
+        obrigatorias = ["ccb"] + COLUNAS_ATUALIZAR
+        faltantes = [
+            coluna for coluna in obrigatorias
+            if coluna not in df.columns
+        ]
+
+        if faltantes:
+            raise ValueError(
+                "Estas colunas não foram encontradas no Excel:\n\n"
+                + "\n".join(faltantes)
+            )
+
+        atualizados = 0
+        nao_encontrados = 0
+        sem_dados = 0
+        sem_ccb = 0
+
+        # Abrir conexão com o banco
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.cursor()
+
+            for _, linha in df.iterrows():
+                ccb = linha["ccb"]
+
+                if not esta_preenchido(ccb):
+                    sem_ccb += 1
+                    continue
+
+                ccb = str(ccb).strip()
+
+                # Separar apenas os campos preenchidos
+                campos = {}
+
+                for coluna in COLUNAS_ATUALIZAR:
+                    valor = linha[coluna]
+
+                    if not esta_preenchido(valor):
+                        continue
+
+                    # Converter datas do pandas para texto
+                    if isinstance(valor, pd.Timestamp):
+                        valor = valor.strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        )
+
+                    # Converter tipos NumPy para tipos Python
+                    if hasattr(valor, "item"):
+                        valor = valor.item()
+
+                    campos[coluna] = valor
+
+                if not campos:
+                    sem_dados += 1
+                    continue
+
+                # Verificar se o CCB existe no banco
+                cursor.execute(
+                    f'SELECT id FROM "{TABELA}" WHERE ccb = ?',
+                    (ccb,),
+                )
+
+                registros = cursor.fetchall()
+
+                if not registros:
+                    nao_encontrados += 1
+                    continue
+
+                # Montar o UPDATE apenas com as colunas preenchidas
+                set_sql = ", ".join(
+                    f'"{coluna}" = ?'
+                    for coluna in campos
+                )
+
+                sql = (
+                    f'UPDATE "{TABELA}" '
+                    f'SET {set_sql} WHERE ccb = ?'
+                )
+
+                cursor.execute(
+                    sql,
+                    list(campos.values()) + [ccb],
+                )
+
+                atualizados += cursor.rowcount
+
+        # Exibir resultado
+        messagebox.showinfo(
+            "Atualização concluída",
+            f"Planilha processada com sucesso!\n\n"
+            f"Registros atualizados: {atualizados}\n"
+            f"CCBs não encontrados: {nao_encontrados}\n"
+            f"Linhas sem dados para atualizar: {sem_dados}\n"
+            f"Linhas sem CCB: {sem_ccb}",
+        )
+
+    except Exception as erro:
+        messagebox.showerror(
+            "Erro na atualização",
+            str(erro),
+        )
+
+
+# =========================
+# INTERFACE TKINTER
+# =========================
+
+janela = tk.Tk()
+janela.title("Atualizar clientes SQLite")
+janela.geometry("430x190")
+janela.resizable(False, False)
+
+titulo = tk.Label(
+    janela,
+    text="Atualização de clientes",
+    font=("Arial", 15, "bold"),
+)
+titulo.pack(pady=(25, 10))
+
+descricao = tk.Label(
+    janela,
+    text="Selecione uma planilha Excel para atualizar o banco.",
+    font=("Arial", 10),
+)
+descricao.pack(pady=5)
+
+botao = tk.Button(
+    janela,
+    text="Selecionar planilha e atualizar",
+    command=executar_atualizacao,
+    font=("Arial", 11),
+    padx=12,
+    pady=7,
+)
+botao.pack(pady=15)
+
+janela.mainloop()
+
+
+
+'''
+
+'''
+import sqlite3
+
+conn = sqlite3.connect("clientes.db")
+cursor = conn.cursor()
+
+# Estrutura da tabela
+cursor.execute("PRAGMA table_info(clientes)")
+
+print("\n=== COLUNAS DA TABELA CLIENTES ===\n")
+
+for coluna in cursor.fetchall():
+    cid, nome, tipo, notnull, default, pk = coluna
+    print(
+        f"Coluna: {nome} | Tipo: {tipo} | "
+        f"NOT NULL: {notnull} | Default: {default} | PK: {pk}"
+    )
+
+# SQL de criação: mostra CHECK constraints e outras regras
+cursor.execute("""
+    SELECT sql
+    FROM sqlite_master
+    WHERE type = 'table' AND name = 'clientes'
+""")
+
+print("\n=== REGRAS E CONSTRAINTS ===\n")
+print(cursor.fetchone()[0])
+
+# Valores existentes em cada coluna
+print("\n=== VALORES DISTINTOS POR COLUNA ===\n")
+
+cursor.execute("PRAGMA table_info(clientes)")
+
+for coluna in cursor.fetchall():
+    nome = coluna[1]
+    cursor.execute(
+        f'SELECT DISTINCT "{nome}" FROM clientes LIMIT 100'
+    )
+    valores = [linha[0] for linha in cursor.fetchall()]
+    print(f"{nome}: {valores}")
+
+conn.close()
+
+'''
+
+'''
+
+
+import sqlite3
+import shutil
+import threading
+import queue
+import tkinter as tk
+import pandas as pd
+
+from pathlib import Path
+from tkinter import filedialog, messagebox
+from datetime import datetime
+
+PASTA = Path(__file__).parent
+DB_PATH = PASTA / "clientes.db"
+
+COLUNAS = [
+    "auditado",
+    "status final",
+    "motivo",
+    "auditoria_modificada_em",
+    "cpf_regular",
+    "financeiro_ok",
+    "documentos_pessoais_ok",
+    "pendencia_documental",
+    "responsavel",
+]
+
+eventos = queue.Queue()
+
+
+def preencher(valor):
+    if pd.isna(valor):
+        return False
+    return not (isinstance(valor, str) and not valor.strip())
+
+
+def executar(excel):
+    try:
+        if not DB_PATH.exists():
+            raise FileNotFoundError(f"Banco não encontrado: {DB_PATH}")
+
+        # Backup antes de alterar o banco
+        backup = DB_PATH.with_name(
+            f"clientes_backup_{datetime.now():%Y%m%d_%H%M%S}.db"
+        )
+        shutil.copy2(DB_PATH, backup)
+
+        df = pd.read_excel(excel, dtype=str)
+        df.columns = df.columns.str.strip()
+
+        faltantes = [
+            c for c in ["ccb"] + COLUNAS
+            if c not in df.columns
+        ]
+        if faltantes:
+            raise ValueError(f"Colunas ausentes: {faltantes}")
+
+        # Carregar registros do banco uma única vez
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT ccb, id FROM clientes")
+            mapa = {}
+            for ccb, id_registro in cursor.fetchall():
+                if ccb is not None:
+                    mapa.setdefault(str(ccb).strip(), []).append(id_registro)
+
+            # Preparar atualizações em memória
+            tarefas = []
+
+            for _, linha in df.iterrows():
+                ccb = linha["ccb"]
+
+                if not preencher(ccb):
+                    continue
+
+                ccb = str(ccb).strip()
+                ids = mapa.get(ccb, [])
+
+                if not ids:
+                    continue
+
+                campos = {}
+                for coluna in COLUNAS:
+                    valor = linha[coluna]
+                    if preencher(valor):
+                        campos[coluna] = valor.strip() if isinstance(valor, str) else valor
+
+                if campos:
+                    for id_registro in ids:
+                        tarefas.append((id_registro, campos))
+
+            total = len(tarefas)
+            eventos.put(("progresso", 0, total))
+
+            # Transação única; atualizações parametrizadas
+            with conn:
+                for inicio in range(0, total, 500):
+                    lote = tarefas[inicio:inicio + 500]
+
+                    
+                    for id_registro, campos in lote:
+
+                        set_sql = ", ".join(
+                            f'"{coluna}" = ?' for coluna in campos
+                        )
+                        sql = f'UPDATE clientes SET {set_sql} WHERE id = ?'
+
+                        try:
+                            cursor.execute(
+                                sql,
+                                list(campos.values()) + [id_registro]
+                            )
+                        except sqlite3.IntegrityError as erro:
+                            raise RuntimeError(
+                                f"Erro no registro ID {id_registro}: {erro}"
+                            ) from erro
+
+                    eventos.put((
+                        "progresso",
+                        min(inicio + len(lote), total),
+                        total
+                    ))
+
+        eventos.put(("fim", total, backup))
+
+    except Exception as erro:
+        eventos.put(("erro", str(erro)))
+
+
+def selecionar():
+    excel = filedialog.askopenfilename(
+        title="Selecione a planilha",
+        filetypes=[("Excel", "*.xlsx *.xls")]
+    )
+    if not excel:
+        return
+
+    botao.config(state="disabled")
+    status.config(text="Iniciando...")
+    threading.Thread(
+        target=executar,
+        args=(excel,),
+        daemon=True
+    ).start()
+    janela.after(100, verificar_eventos)
+
+
+def verificar_eventos():
+    try:
+        while True:
+            evento = eventos.get_nowait()
+
+            if evento[0] == "progresso":
+                _, atual, total = evento
+                status.config(text=f"Atualizando: {atual}/{total}")
+
+            elif evento[0] == "fim":
+                _, total, backup = evento
+                status.config(text="Concluído!")
+                botao.config(state="normal")
+                messagebox.showinfo(
+                    "Concluído",
+                    f"Registros atualizados: {total}\n\n"
+                    f"Backup criado em:\n{backup}"
+                )
+                return
+
+            elif evento[0] == "erro":
+                status.config(text="Erro na atualização")
+                botao.config(state="normal")
+                messagebox.showerror("Erro", evento[1])
+                return
+
+    except queue.Empty:
+        pass
+
+    janela.after(100, verificar_eventos)
+
+
+janela = tk.Tk()
+janela.title("Atualizar clientes")
+janela.geometry("430x180")
+janela.resizable(False, False)
+
+tk.Label(
+    janela,
+    text="Atualização do banco SQLite",
+    font=("Arial", 14, "bold")
+).pack(pady=20)
+
+botao = tk.Button(
+    janela,
+    text="Selecionar Excel e atualizar",
+    command=selecionar
+)
+botao.pack(pady=5)
+
+status = tk.Label(janela, text="Aguardando planilha...")
+status.pack(pady=10)
+
+janela.mainloop()
+
+
+'''
+
+'''
+import sqlite3
+
+conn = sqlite3.connect("clientes.db")
+
+try:
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT lastro
+        FROM clientes
+        WHERE ccb = ?    
+    """, ("FJB26R3064",))
+
+
+    resultado = cursor.fetchone()
+    print(resultado)
+
+
+#    conn.commit()
+
+
+finally:
+    conn.close()
+
+    
+    '''
+
+'''
+
+
+import sqlite3
+
+conn = sqlite3.connect("clientes.db")
+cursor = conn.cursor()
+
+# Estrutura da tabela
+cursor.execute("PRAGMA table_info(clientes)")
+
+print("\n=== COLUNAS DA TABELA CLIENTES ===\n")
+
+for coluna in cursor.fetchall():
+    cid, nome, tipo, notnull, default, pk = coluna
+    print(
+        f"Coluna: {nome} | Tipo: {tipo} | "
+        f"NOT NULL: {notnull} | Default: {default} | PK: {pk}"
+    )
+
+# SQL de criação: mostra CHECK constraints e outras regras
+cursor.execute("""
+    SELECT sql
+    FROM sqlite_master
+    WHERE type = 'table' AND name = 'clientes'
+""")
+
+print("\n=== REGRAS E CONSTRAINTS ===\n")
+print(cursor.fetchone()[0])
+
+# Valores existentes em cada coluna
+print("\n=== VALORES DISTINTOS POR COLUNA ===\n")
+
+cursor.execute("PRAGMA table_info(clientes)")
+
+for coluna in cursor.fetchall():
+    nome = coluna[1]
+    cursor.execute(
+        f'SELECT DISTINCT "{nome}" FROM clientes LIMIT 100'
+    )
+    valores = [linha[0] for linha in cursor.fetchall()]
+    print(f"{nome}: {valores}")
+
+conn.close()
+
+
+'''
+
+import sqlite3
+
+conn = sqlite3.connect("clientes.db")
+
+try:
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT name
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name NOT LIKE 'sqlite_%'
+    """)
+
+    tabelas = cursor.fetchall()
+
+    for (tabela,) in tabelas:
+        print(f"\nTabela: {tabela}")
+
+        cursor.execute(f'PRAGMA table_info("{tabela}")')
+
+        colunas = cursor.fetchall()
+
+        for coluna in colunas:
+            print(f" - {coluna[1]}")
+
+finally:
+    conn.close()

@@ -347,12 +347,14 @@
                         <th scope="col">Motivo / observações</th>
                         <th scope="col">Ações</th>
                         <th scope="col">Última alteração</th>
+                        <th scope="col">Responsável original</th>
+                        <th scope="col">Último responsável</th>
                     </tr>
                 </thead>
 
                 <tbody id="corpoAuditoria">
                     <tr>
-                        <td colspan="11" class="text-center py-5">
+                        <td colspan="12" class="text-center py-5">
                             <div
                                 class="spinner-border spinner-border-sm text-primary me-2"
                                 role="status"
@@ -630,6 +632,7 @@
                                     <option value="">Selecione</option>
                                     <option value="Sim">Sim</option>
                                     <option value="Não">Não</option>
+                                    <option value="Não validado">Não foi possível validar</option>
                                 </select>
                             </div>
 
@@ -694,7 +697,7 @@
                             <option value="">Selecione o resultado</option>
                             <option value="Aprovado">Aprovado</option>
                             <option value="Reprovado">Reprovado</option>
-                            <option value="Pendente">Pendente</option>
+                            <option value="Pendente de regularização">Pendente</option>
                         </select>
 
                         <div class="form-text">

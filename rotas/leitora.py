@@ -373,6 +373,7 @@ async def pagina_leitora(
     )
 
 
+
 @router.get("/leitora/comp", response_class=HTMLResponse)
 async def pagina_leitora_comp(
     request: Request,
@@ -384,7 +385,7 @@ async def pagina_leitora_comp(
 
     return templates.TemplateResponse(
         request=request,
-        name="leitora comp.html",
+        name="leitoracomp.html",
         context={
             "usuario_logado": usuario,
             "messages": [],
@@ -676,4 +677,3 @@ async def parse_leitora_comp(
             motivo="erro_interno",
         )
         raise
-    

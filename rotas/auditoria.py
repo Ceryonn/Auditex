@@ -47,7 +47,7 @@ def garantir_schema_auditoria(con):
 
     cursor.execute("PRAGMA table_info(clientes)")
     colunas = {
-        row["name"]
+        row[1]
         for row in cursor.fetchall()
     }
 
@@ -89,6 +89,29 @@ def garantir_schema_auditoria(con):
         ON logs_sistema(email)
     """)
 
+
+
+    cursor.execute("PRAGMA table_info(clientes)")
+    colunas = {
+        coluna[1]
+        for coluna in cursor.fetchall()
+    }
+
+    if "responsavel" not in colunas:
+        cursor.execute(
+            """
+            ALTER TABLE clientes
+            ADD COLUMN responsavel TEXT
+            """
+        )
+
+    if "ultimo_responsavel" not in colunas:
+        cursor.execute(
+            """
+            ALTER TABLE clientes
+            ADD COLUMN ultimo_responsavel TEXT
+            """
+        )
     con.commit()
 
 
@@ -247,7 +270,6 @@ async def pagina_log(
             detail="Você não tem permissão para acessar os logs.",
         )
 
-    # Registra o acesso à página.
     registrar_evento_auditoria(
         usuario=usuario,
         request=request,
@@ -453,7 +475,6 @@ async def pagina_log(
             except (ValueError, TypeError):
                 detalhes = {}
 
-            # O template utiliza log.resultado para colorir o evento.
             log["resultado"] = detalhes.get("resultado", "")
 
             logs.append(log)
@@ -599,6 +620,7 @@ def obter_resumo_global(con):
     return dados
 
 
+
 @router.get("/auditorias/registros")
 def listar_registros(
     busca: str = Query(default="", max_length=200),
@@ -626,6 +648,7 @@ def listar_registros(
                     OR nome LIKE ?
                 )
             """)
+
             like = f"%{termo}%"
             parametros.extend([like, like, like])
 
@@ -642,8 +665,7 @@ def listar_registros(
 
         cursor = con.cursor()
 
-        # Um único resumo atende tanto à contagem quanto
-        # aos indicadores da consulta filtrada.
+        # Resumo dos registros filtrados.
         cursor.execute(
             f"""
             SELECT
@@ -678,13 +700,15 @@ def listar_registros(
             "auditados": auditados,
             "pendentes": pendentes,
             "percentual_auditado": (
-                round(auditados * 100 / total, 2) if total else 0
+                round(auditados * 100 / total, 2)
+                if total else 0
             ),
         }
 
-        # Sem filtros, o resumo global também é o da consulta.
+        # Resumo global.
         if not termo and not filtro_operacao:
             resumo_global = resumo_consulta
+
             with _cache_resumo_lock:
                 _cache_resumo_global["dados"] = resumo_global
                 _cache_resumo_global["expira_em"] = (
@@ -693,6 +717,7 @@ def listar_registros(
         else:
             resumo_global = obter_resumo_global(con)
 
+        # Consulta dos registros, incluindo os responsáveis.
         cursor.execute(
             f"""
             SELECT
@@ -709,7 +734,9 @@ def listar_registros(
                 cpf_regular,
                 financeiro_ok,
                 documentos_pessoais_ok,
-                pendencia_documental
+                pendencia_documental,
+                responsavel,
+                ultimo_responsavel
             FROM clientes
             {where}
             ORDER BY id
@@ -751,6 +778,7 @@ def listar_registros(
 
 
 
+
 @router.put("/auditorias/registros/{id}")
 async def atualizar_auditoria(
     id: int,
@@ -775,6 +803,20 @@ async def atualizar_auditoria(
             status_code=403,
             detail="Você não tem permissão para editar auditorias.",
         )
+
+    # O responsável sempre vem do usuário autenticado.
+    responsavel_atual = getattr(usuario, "email", None)
+
+    if (
+        not isinstance(responsavel_atual, str)
+        or not responsavel_atual.strip()
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Não foi possível identificar o usuário responsável.",
+        )
+
+    responsavel_atual = responsavel_atual.strip()
 
     try:
         dados = await request.json()
@@ -820,11 +862,10 @@ async def atualizar_auditoria(
         "Concluído",
     }
 
-    # Mantém os status finais já utilizados pelo seu sistema.
     resultados_permitidos = {
         "Aprovado",
         "Reprovado",
-        "Pendente",
+        "Pendente de regularização",
     }
 
     campos_sim_nao = (
@@ -833,7 +874,6 @@ async def atualizar_auditoria(
         "documentos_pessoais_ok",
     )
 
-    # Exige os campos antigos, como antes.
     auditado = dados.get("auditado")
     status_final = dados.get("status_final")
     motivo = dados.get("motivo", "")
@@ -849,7 +889,7 @@ async def atualizar_auditoria(
             status_code=422,
             detail=(
                 "O status final deve ser Aprovado, "
-                "Reprovado ou Pendente."
+                "Reprovado ou Pendente de regularização."
             ),
         )
 
@@ -873,16 +913,28 @@ async def atualizar_auditoria(
             detail="Informe o motivo para este resultado.",
         )
 
-    # Os campos novos são opcionais na requisição para manter
-    # compatibilidade com a tela atual.
     for campo in campos_sim_nao:
         if campo in dados:
             valor = dados[campo]
 
-            if valor not in ("Sim", "Não", None):
+
+            if campo == "cpf_regular":
+                valores_permitidos = (
+                    "Sim",
+                    "Não",
+                    "Não validado",
+                    None,
+                )
+            else:
+                valores_permitidos = (
+                    "Sim",
+                    "Não",
+                    None,
+                )
+            if valor not in valores_permitidos:
                 raise HTTPException(
                     status_code=422,
-                    detail=f"O campo {campo} deve ser Sim ou Não.",
+                    detail=f"Valor inválido para o campo {campo}",
                 )
 
     if "pendencia_documental" in dados:
@@ -925,7 +977,9 @@ async def atualizar_auditoria(
                 cpf_regular,
                 financeiro_ok,
                 documentos_pessoais_ok,
-                pendencia_documental
+                pendencia_documental,
+                responsavel,
+                ultimo_responsavel
             FROM clientes
             WHERE id = ?
             """,
@@ -942,8 +996,18 @@ async def atualizar_auditoria(
 
         anterior = dict(registro)
 
-        # Se um campo novo não for enviado, preserva o valor
-        # existente no banco.
+        # Preserva o responsável original.
+        # Se ainda não houver um, registra o usuário atual.
+        responsavel_original = (
+            anterior.get("responsavel")
+            or responsavel_atual
+        )
+
+        # Sempre registra quem realizou a atualização mais recente.
+        ultimo_responsavel = responsavel_atual
+
+        # Se os campos opcionais não forem enviados,
+        # preserva os valores que já existem no banco.
         novos_valores = {}
 
         for campo in campos_sim_nao:
@@ -974,6 +1038,8 @@ async def atualizar_auditoria(
                 financeiro_ok = ?,
                 documentos_pessoais_ok = ?,
                 pendencia_documental = ?,
+                responsavel = ?,
+                ultimo_responsavel = ?,
                 auditoria_modificada_em = ?
             WHERE id = ?
             """,
@@ -985,6 +1051,8 @@ async def atualizar_auditoria(
                 novos_valores["financeiro_ok"],
                 novos_valores["documentos_pessoais_ok"],
                 novos_valores["pendencia_documental"],
+                responsavel_original,
+                ultimo_responsavel,
                 data_modificacao,
                 id,
             ),
@@ -1002,6 +1070,14 @@ async def atualizar_auditoria(
             "motivo_alterado": (
                 (anterior.get("motivo") or "") != motivo
             ),
+            "responsavel": {
+                "anterior": anterior.get("responsavel"),
+                "novo": responsavel_original,
+            },
+            "ultimo_responsavel": {
+                "anterior": anterior.get("ultimo_responsavel"),
+                "novo": ultimo_responsavel,
+            },
         }
 
         for campo in campos_sim_nao:
@@ -1018,6 +1094,8 @@ async def atualizar_auditoria(
         detalhes = {
             "resultado": "sucesso",
             "campos_alterados": campos_alterados,
+            "responsavel_original": responsavel_original,
+            "ultimo_responsavel": ultimo_responsavel,
             "data_modificacao": data_modificacao,
         }
 
@@ -1034,10 +1112,16 @@ async def atualizar_auditoria(
         con.commit()
 
         logger.info(
-            "usuario=%s | ip=%s | AUDITORIA_ATUALIZADA | id=%s",
-            getattr(usuario, "email", "desconhecido"),
+            (
+                "usuario=%s | ip=%s | AUDITORIA_ATUALIZADA "
+                "| id=%s | responsavel_original=%s "
+                "| ultimo_responsavel=%s"
+            ),
+            responsavel_atual,
             obter_ip_requisicao(request),
             id,
+            responsavel_original,
+            ultimo_responsavel,
         )
 
         return {
@@ -1055,6 +1139,8 @@ async def atualizar_auditoria(
                 "pendencia_documental": (
                     novos_valores["pendencia_documental"]
                 ),
+                "responsavel": responsavel_original,
+                "ultimo_responsavel": ultimo_responsavel,
                 "auditoria_modificada_em": data_modificacao,
             },
         }

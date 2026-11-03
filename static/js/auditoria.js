@@ -141,7 +141,7 @@ function exibirErro(mensagem) {
 
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 11;
+    td.colSpan = 13;
     td.className = "auditoria-empty";
 
     const icone = document.createElement("i");
@@ -166,7 +166,7 @@ function exibirCarregamento() {
 
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 11;
+    td.colSpan = 13;
     td.className = "text-center py-5 text-secondary";
 
     const spinner = document.createElement("span");
@@ -192,7 +192,7 @@ function renderizarRegistros(registros) {
     if (!registros.length) {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 11;
+        td.colSpan = 13;
         td.className = "auditoria-empty";
 
         const titulo = document.createElement("div");
@@ -314,6 +314,20 @@ function renderizarRegistros(registros) {
                 dataAlteracao
                     ? formatarDataAuditoria(dataAlteracao)
                     : "Ainda não modificada",
+                "text-nowrap"
+            )
+        );
+
+        tr.appendChild(
+            criarCelula(
+                registro.responsavel,
+                "text-nowrap"
+            )
+        );
+
+        tr.appendChild(
+            criarCelula(
+                registro.ultimo_responsavel,
                 "text-nowrap"
             )
         );
@@ -568,6 +582,8 @@ formularioAuditoria.addEventListener("submit", async (evento) => {
                     : "Não foi possível salvar a auditoria."
             );
         }
+
+
 
         definirMensagem(
             sucessoAuditoria,
