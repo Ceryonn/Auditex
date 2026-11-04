@@ -28,6 +28,9 @@ from database.database import obter_db
 from database.clientes import obter_conexao_clientes
 from rotas.auth import obter_usuario_logado_web
 
+import calendar
+from collections import defaultdict
+from zoneinfo import ZoneInfo
 
 load_dotenv()
 
@@ -646,11 +649,12 @@ def listar_registros(
                     documento LIKE ?
                     OR ccb LIKE ?
                     OR nome LIKE ?
+                    OR auditoria_modificada_em LIKE ?
                 )
             """)
 
             like = f"%{termo}%"
-            parametros.extend([like, like, like])
+            parametros.extend([like, like, like, like])
 
         filtro_operacao = operacao.strip() if operacao else ""
 
@@ -971,6 +975,7 @@ async def atualizar_auditoria(
             """
             SELECT
                 id,
+                ccb,
                 auditado,
                 "status final" AS status_final,
                 motivo,
@@ -996,18 +1001,13 @@ async def atualizar_auditoria(
 
         anterior = dict(registro)
 
-        # Preserva o responsável original.
-        # Se ainda não houver um, registra o usuário atual.
         responsavel_original = (
             anterior.get("responsavel")
             or responsavel_atual
         )
 
-        # Sempre registra quem realizou a atualização mais recente.
         ultimo_responsavel = responsavel_atual
 
-        # Se os campos opcionais não forem enviados,
-        # preserva os valores que já existem no banco.
         novos_valores = {}
 
         for campo in campos_sim_nao:
@@ -1093,6 +1093,7 @@ async def atualizar_auditoria(
 
         detalhes = {
             "resultado": "sucesso",
+            "ccb": anterior.get("ccb"),
             "campos_alterados": campos_alterados,
             "responsavel_original": responsavel_original,
             "ultimo_responsavel": ultimo_responsavel,
@@ -1454,3 +1455,238 @@ async def baixar_lastro(
             "Cache-Control": "no-store",
         },
     )
+
+
+@router.get("/auditorias/acompanhamento")
+async def pagina_acompanhamento(
+    request: Request,
+    usuario=Depends(exigir_usuario_logado),
+):
+    registrar_evento_auditoria(
+        usuario=usuario,
+        request=request,
+        acao="ACESSAR_ACOMPANHAMENTO",
+        entidade="auditoria",
+        detalhes={
+            "resultado": "sucesso",
+            "recurso": "/auditorias/acompanhamento",
+        },
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="acompanhamento_auditoria.html",
+        context={
+            "titulo": "Acompanhamento de Auditorias",
+            "usuario_logado": usuario,
+        },
+    )
+
+
+@router.get("/auditorias/acompanhamento/dados")
+def dados_acompanhamento(
+    ano: int = Query(ge=2000, le=2100),
+    mes: int = Query(ge=1, le=12),
+    auditor: str | None = Query(default=None, max_length=200),
+    request: Request = None,
+    usuario=Depends(exigir_usuario_logado),
+):
+    primeiro_dia = datetime(ano, mes, 1).date()
+    ultimo_dia_numero = calendar.monthrange(ano, mes)[1]
+
+    ultimo_dia = datetime(
+        ano, mes, ultimo_dia_numero
+    ).date()
+
+    if mes == 12:
+        proximo_mes = datetime(ano + 1, 1, 1).date()
+    else:
+        proximo_mes = datetime(ano, mes + 1, 1).date()
+
+    filtro_auditor = auditor.strip() if auditor else ""
+
+    con = obter_conexao_clientes()
+
+    try:
+        garantir_schema_auditoria(con)
+
+        cursor = con.cursor()
+
+        # Lista de auditores disponíveis.
+        cursor.execute("""
+            SELECT DISTINCT email
+            FROM logs_sistema
+            WHERE acao = 'ATUALIZAR_AUDITORIA'
+              AND email IS NOT NULL
+              AND TRIM(email) <> ''
+            ORDER BY email COLLATE NOCASE
+        """)
+
+        auditores = [
+            row["email"]
+            for row in cursor.fetchall()
+        ]
+
+        # Recupera as propostas efetivamente auditadas.
+        #
+        # Para logs novos, utiliza o CCB salvo no próprio log.
+        # Para logs antigos, recupera o CCB pela relação
+        # entre logs_sistema.registro_id e clientes.id.
+
+        sql = """
+            SELECT DISTINCT
+                date(l.data_hora, '-3 hours') AS dia,
+                l.email AS auditor,
+                TRIM(
+                    COALESCE(
+                        NULLIF(
+                            json_extract(l.detalhes, '$.ccb'),
+                            ''
+                        ),
+                        c.ccb
+                    )
+                ) AS ccb
+
+            FROM logs_sistema l
+
+            LEFT JOIN clientes c
+                ON CAST(l.registro_id AS INTEGER) = c.id
+
+            WHERE l.acao = 'ATUALIZAR_AUDITORIA'
+
+              AND json_extract(
+                    l.detalhes,
+                    '$.resultado'
+                  ) = 'sucesso'
+
+              AND l.email IS NOT NULL
+
+              AND date(l.data_hora, '-3 hours') >= ?
+
+              AND date(l.data_hora, '-3 hours') < ?
+
+              AND TRIM(
+                    COALESCE(
+                        NULLIF(
+                            json_extract(l.detalhes, '$.ccb'),
+                            ''
+                        ),
+                        c.ccb
+                    )
+                  ) IS NOT NULL
+
+              AND TRIM(
+                    COALESCE(
+                        NULLIF(
+                            json_extract(l.detalhes, '$.ccb'),
+                            ''
+                        ),
+                        c.ccb
+                    )
+                  ) <> ''
+        """
+
+        parametros = [
+            primeiro_dia.isoformat(),
+            proximo_mes.isoformat(),
+        ]
+
+        if filtro_auditor:
+            sql += " AND l.email = ?"
+            parametros.append(filtro_auditor)
+
+        sql += """
+            ORDER BY dia, auditor, ccb
+        """
+
+        cursor.execute(sql, parametros)
+
+        registros = cursor.fetchall()
+
+        # Agrupamento:
+        # dia -> auditor -> conjunto de CCBs.
+        acompanhamento = defaultdict(
+            lambda: defaultdict(set)
+        )
+
+        for registro in registros:
+            dia = registro["dia"]
+            email = registro["auditor"]
+            ccb = str(registro["ccb"]).strip()
+
+            if dia and email and ccb:
+                acompanhamento[dia][email].add(ccb)
+
+        # Monta todos os dias do mês, inclusive os dias zerados.
+        dias = []
+
+        total_mes = 0
+        dias_ativos = 0
+
+        for numero_dia in range(1, ultimo_dia_numero + 1):
+
+            data = datetime(
+                ano, mes, numero_dia
+            ).date()
+
+            chave_dia = data.isoformat()
+
+            dados_auditores = []
+
+            total_dia = 0
+
+            for email, ccbs in sorted(
+                acompanhamento[chave_dia].items()
+            ):
+                quantidade = len(ccbs)
+
+                total_dia += quantidade
+
+                dados_auditores.append({
+                    "email": email,
+                    "total": quantidade,
+                    "ccbs": sorted(ccbs),
+                })
+
+            dias.append({
+                "data": chave_dia,
+                "dia": numero_dia,
+                "total": total_dia,
+                "auditores": dados_auditores,
+            })
+
+            total_mes += total_dia
+
+            if total_dia > 0:
+                dias_ativos += 1
+
+        # Média considerando todos os dias do mês.
+        media_diaria = round(
+            total_mes / ultimo_dia_numero,
+            2,
+        )
+
+        return {
+            "ano": ano,
+            "mes": mes,
+            "auditor": filtro_auditor or None,
+            "total_mes": total_mes,
+            "dias_ativos": dias_ativos,
+            "media_diaria": media_diaria,
+            "total_dias": ultimo_dia_numero,
+            "auditores": auditores,
+            "dias": dias,
+        }
+
+    except sqlite3.Error:
+        logger.exception(
+            "Erro ao consultar acompanhamento de auditorias."
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail="Não foi possível consultar o acompanhamento.",
+        )
+
+    finally:
+        con.close()

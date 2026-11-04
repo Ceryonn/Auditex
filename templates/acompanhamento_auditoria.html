@@ -1,0 +1,470 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Acompanhamento de Auditorias | Auditex{% endblock %}
+
+{% block nav_auditorias %}active{% endblock %}
+
+{% block breadcrumb %}
+<span class="breadcrumb-current">
+    <i class="bi bi-clipboard2-check me-2"></i>
+    Auditoria
+</span>
+<span class="mx-2 text-secondary">/</span>
+<span class="breadcrumb-current">Acompanhamento</span>
+{% endblock %}
+
+{% block conteudo %}
+
+<div class="container-fluid px-0">
+
+    <!-- CABEÇALHO -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bi bi-graph-up-arrow me-2"></i>
+                Acompanhamento de Auditorias
+            </h4>
+
+            <p class="text-secondary mb-0">
+                Acompanhe a produtividade e o volume de auditorias realizadas.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <span class="badge text-bg-light border text-secondary p-2">
+                <i class="bi bi-calendar3 me-1"></i>
+                Visão mensal
+            </span>
+        </div>
+
+    </div>
+
+
+    <!-- FILTROS -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-funnel me-2 text-primary"></i>
+                <h6 class="fw-bold mb-0">Filtros do acompanhamento</h6>
+            </div>
+
+            <div class="row g-3 align-items-end">
+
+                <div class="col-12 col-md-3">
+
+                    <label for="filtroAno" class="form-label fw-semibold">
+                        Ano
+                    </label>
+
+                    <select id="filtroAno" class="form-select">
+                        <option value="2026" selected>2026</option>
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
+                    </select>
+
+                </div>
+
+                <div class="col-12 col-md-3">
+
+                    <label for="filtroMes" class="form-label fw-semibold">
+                        Mês
+                    </label>
+
+                    <select id="filtroMes" class="form-select">
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+
+                </div>
+
+                <div class="col-12 col-md-4">
+
+                    <label for="filtroAuditor" class="form-label fw-semibold">
+                        Auditor
+                    </label>
+
+                    <select id="filtroAuditor" class="form-select">
+                        <option value="">Todos os auditores</option>
+                    </select>
+
+                </div>
+
+                <div class="col-12 col-md-2">
+
+                    <button
+                        type="button"
+                        id="btnConsultar"
+                        class="btn btn-primary w-100"
+                    >
+                        <i class="bi bi-search me-1"></i>
+                        Consultar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- INDICADORES -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-sm-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+                            <span class="text-secondary small fw-semibold">
+                                TOTAL AUDITADO
+                            </span>
+
+                            <h3 class="fw-bold mt-2 mb-1" id="totalMes">
+                                —
+                            </h3>
+
+                            <small class="text-secondary">
+                                CCBs auditadas no mês
+                            </small>
+                        </div>
+
+                        <div class="rounded-3 bg-primary bg-opacity-10 p-3">
+                            <i class="bi bi-clipboard-check text-primary fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-12 col-sm-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+                            <span class="text-secondary small fw-semibold">
+                                DIAS ATIVOS
+                            </span>
+
+                            <h3 class="fw-bold mt-2 mb-1" id="diasAtivos">
+                                —
+                            </h3>
+
+                            <small class="text-secondary">
+                                Dias com auditorias realizadas
+                            </small>
+                        </div>
+
+                        <div class="rounded-3 bg-success bg-opacity-10 p-3">
+                            <i class="bi bi-calendar-check text-success fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-12 col-sm-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+                            <span class="text-secondary small fw-semibold">
+                                MÉDIA DIÁRIA
+                            </span>
+
+                            <h3 class="fw-bold mt-2 mb-1" id="mediaDiaria">
+                                —
+                            </h3>
+
+                            <small class="text-secondary">
+                                Média por dia do mês
+                            </small>
+                        </div>
+
+                        <div class="rounded-3 bg-info bg-opacity-10 p-3">
+                            <i class="bi bi-bar-chart-line text-info fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-12 col-sm-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+                            <span class="text-secondary small fw-semibold">
+                                DIAS DO MÊS
+                            </span>
+
+                            <h3 class="fw-bold mt-2 mb-1" id="totalDias">
+                                —
+                            </h3>
+
+                            <small class="text-secondary">
+                                Dias considerados no período
+                            </small>
+                        </div>
+
+                        <div class="rounded-3 bg-warning bg-opacity-10 p-3">
+                            <i class="bi bi-calendar-month text-warning fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RESUMO DO PERÍODO -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-calendar3 me-2"></i>
+                        Resumo do período
+                    </h5>
+
+                    <p class="text-secondary small mb-0">
+                        Distribuição das auditorias realizadas ao longo do mês.
+                    </p>
+                </div>
+
+                <span class="badge text-bg-light border text-secondary" id="periodoSelecionado">
+                    —
+                </span>
+
+            </div>
+
+            <div id="resumoPeriodo" class="row g-3">
+
+                <div class="col-12 text-center py-4 text-secondary">
+                    <i class="bi bi-hourglass-split fs-3 d-block mb-2"></i>
+                    Aguardando consulta dos dados.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DETALHAMENTO DIÁRIO -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white border-0 pt-3 px-3">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-calendar-week me-2"></i>
+                        Detalhamento diário
+                    </h5>
+
+                    <p class="text-secondary small mb-0">
+                        Quantidade de CCBs auditadas por dia e por auditor.
+                    </p>
+                </div>
+
+                <span class="badge text-bg-primary" id="contadorDias">
+                    0 dias
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th style="min-width: 120px;">Data</th>
+                            <th style="min-width: 100px;" class="text-center">
+                                Total do dia
+                            </th>
+                            <th style="min-width: 250px;">
+                                Auditores
+                            </th>
+                            <th style="min-width: 100px;" class="text-center">
+                                Detalhamento
+                            </th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="tabelaAcompanhamento">
+
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-secondary">
+
+                                <i class="bi bi-calendar3 fs-2 d-block mb-2"></i>
+
+                                Selecione um período e clique em consultar.
+
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DETALHAMENTO DE CCBs -->
+    <div class="card border-0 shadow-sm mb-4" id="cardDetalhamento">
+
+        <div class="card-header bg-white border-0 pt-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-file-earmark-text me-2"></i>
+                        CCBs auditadas
+                    </h5>
+
+                    <p class="text-secondary small mb-0" id="tituloDetalhamento">
+                        Selecione um dia para visualizar as CCBs.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    id="btnFecharDetalhamento"
+                >
+                    <i class="bi bi-x-lg me-1"></i>
+                    Fechar
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            <div id="conteudoDetalhamento">
+
+                <div class="text-center text-secondary py-4">
+
+                    <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+
+                    Nenhum detalhamento selecionado.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ESTADO DE CARREGAMENTO -->
+    <div
+        id="estadoCarregamento"
+        class="text-center py-3 d-none"
+    >
+
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+
+        <p class="text-secondary small mt-2 mb-0">
+            Consultando acompanhamento de auditorias...
+        </p>
+
+    </div>
+
+
+    <!-- MENSAGEM DE ERRO -->
+    <div
+        id="mensagemErro"
+        class="alert alert-danger d-none"
+        role="alert"
+    >
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span id="textoErro">
+            Não foi possível consultar os dados.
+        </span>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block scripts %}
+<script
+    src="{{ url_for('static', path='/js/acompanhamento_auditoria.js') }}"
+></script>
+{% endblock %}
+
+
+{% block estilos %}
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', path='/css/acompanhamento_auditoria.css') }}"
+>
+{% endblock %}

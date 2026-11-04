@@ -1,0 +1,439 @@
+
+/* =========================================================
+   AUDITEX - ACOMPANHAMENTO DE AUDITORIAS
+   ========================================================= */
+
+/* CONTAINER PRINCIPAL */
+
+.acompanhamento-page {
+    width: 100%;
+    min-width: 0;
+}
+
+.acompanhamento-page .page-heading {
+    margin-bottom: 1.5rem;
+}
+
+.acompanhamento-page h4,
+.acompanhamento-page h5,
+.acompanhamento-page h6 {
+    color: #172b4d;
+    letter-spacing: -0.3px;
+}
+
+.acompanhamento-page .text-secondary {
+    color: #718096 !important;
+}
+
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.acompanhamento-page .card {
+    border-radius: 14px;
+    border: 1px solid #e9edf3 !important;
+    background: #ffffff;
+    transition: box-shadow 0.2s ease;
+}
+
+.acompanhamento-page .card:hover {
+    box-shadow: 0 5px 18px rgba(24, 39, 75, 0.07) !important;
+}
+
+.acompanhamento-page .card-body {
+    padding: 1.25rem;
+}
+
+.acompanhamento-page .card-header {
+    border-radius: 14px 14px 0 0;
+}
+
+
+/* =========================================================
+   CABEÇALHO
+   ========================================================= */
+
+.acompanhamento-page .page-heading h4 {
+    font-size: 1.45rem;
+    font-weight: 750;
+}
+
+.acompanhamento-page .page-heading p {
+    font-size: 0.9rem;
+}
+
+.acompanhamento-page .badge {
+    font-weight: 600;
+    letter-spacing: 0.1px;
+}
+
+
+/* =========================================================
+   FILTROS
+   ========================================================= */
+
+.acompanhamento-page .form-label {
+    color: #344563;
+    font-size: 0.83rem;
+    margin-bottom: 0.45rem;
+}
+
+.acompanhamento-page .form-select,
+.acompanhamento-page .form-control {
+    min-height: 43px;
+    border-radius: 9px;
+    border-color: #dce3ed;
+    font-size: 0.9rem;
+    color: #344563;
+    background-color: #ffffff;
+}
+
+.acompanhamento-page .form-select:focus,
+.acompanhamento-page .form-control:focus {
+    border-color: #4b83e6;
+    box-shadow: 0 0 0 3px rgba(75, 131, 230, 0.12);
+}
+
+
+/* =========================================================
+   BOTÕES
+   ========================================================= */
+
+.acompanhamento-page .btn {
+    border-radius: 9px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.acompanhamento-page .btn-primary {
+    background: #315fbd;
+    border-color: #315fbd;
+}
+
+.acompanhamento-page .btn-primary:hover {
+    background: #244d9e;
+    border-color: #244d9e;
+    transform: translateY(-1px);
+}
+
+.acompanhamento-page .btn-outline-secondary:hover {
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   INDICADORES
+   ========================================================= */
+
+.acompanhamento-page .indicator-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.acompanhamento-page .indicator-card h3 {
+    font-size: 1.9rem;
+    font-weight: 750;
+    color: #172b4d;
+    letter-spacing: -1px;
+}
+
+.acompanhamento-page .indicator-card .indicator-label {
+    font-size: 0.73rem;
+    font-weight: 750;
+    color: #718096;
+    letter-spacing: 0.7px;
+}
+
+.acompanhamento-page .indicator-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 1.3rem;
+}
+
+.acompanhamento-page .indicator-card:hover {
+    transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   RESUMO DO PERÍODO
+   ========================================================= */
+
+.acompanhamento-page .summary-item {
+    background: #f8faff;
+    border: 1px solid #e9eef7;
+    border-radius: 11px;
+    padding: 1rem;
+    height: 100%;
+}
+
+.acompanhamento-page .summary-item .summary-label {
+    display: block;
+    color: #718096;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+
+.acompanhamento-page .summary-item .summary-value {
+    color: #172b4d;
+    font-size: 1.3rem;
+    font-weight: 750;
+}
+
+.acompanhamento-page .summary-item .summary-description {
+    color: #8995a7;
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+}
+
+
+/* =========================================================
+   TABELA DIÁRIA
+   ========================================================= */
+
+.acompanhamento-page .table {
+    margin-bottom: 0;
+    color: #344563;
+    font-size: 0.87rem;
+}
+
+.acompanhamento-page .table thead th {
+    background: #f5f7fb;
+    color: #53647e;
+    font-size: 0.75rem;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 0.95rem 0.85rem;
+    border-bottom: 1px solid #e6ebf2;
+    white-space: nowrap;
+}
+
+.acompanhamento-page .table tbody td {
+    padding: 0.95rem 0.85rem;
+    vertical-align: middle;
+    border-color: #edf0f5;
+}
+
+.acompanhamento-page .table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.acompanhamento-page .table tbody tr:hover {
+    background: #f7f9fd;
+}
+
+.acompanhamento-page .table .day-total {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 30px;
+    padding: 0 9px;
+    border-radius: 8px;
+    background: #eaf1ff;
+    color: #315fbd;
+    font-weight: 750;
+}
+
+
+/* =========================================================
+   AUDITORES
+   ========================================================= */
+
+.acompanhamento-page .auditor-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.acompanhamento-page .auditor-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #f2f5fa;
+    border: 1px solid #e5eaf2;
+    border-radius: 7px;
+    color: #465873;
+    font-size: 0.76rem;
+}
+
+.acompanhamento-page .auditor-item strong {
+    color: #315fbd;
+}
+
+.acompanhamento-page .auditor-avatar {
+    width: 25px;
+    height: 25px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background: #e4edff;
+    color: #315fbd;
+    font-size: 0.7rem;
+}
+
+
+/* =========================================================
+   BOTÃO DETALHAMENTO
+   ========================================================= */
+
+.acompanhamento-page .btn-detalhamento {
+    border: 1px solid #dce5f2;
+    background: #ffffff;
+    color: #315fbd;
+    padding: 6px 11px;
+    border-radius: 7px;
+    font-size: 0.78rem;
+    font-weight: 650;
+}
+
+.acompanhamento-page .btn-detalhamento:hover {
+    background: #edf3ff;
+    border-color: #b9cdf3;
+}
+
+
+/* =========================================================
+   DETALHAMENTO DAS CCBs
+   ========================================================= */
+
+.acompanhamento-page .ccb-group {
+    border: 1px solid #e7ecf3;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #ffffff;
+}
+
+.acompanhamento-page .ccb-group:last-child {
+    margin-bottom: 0;
+}
+
+.acompanhamento-page .ccb-group-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #344563;
+    margin-bottom: 0.8rem;
+}
+
+.acompanhamento-page .ccb-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.acompanhamento-page .ccb-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 11px;
+    border-radius: 7px;
+    background: #f1f5fb;
+    border: 1px solid #e0e8f3;
+    color: #315fbd;
+    font-size: 0.8rem;
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   CARREGAMENTO
+   ========================================================= */
+
+.acompanhamento-page .loading-container {
+    padding: 2rem;
+    text-align: center;
+}
+
+.acompanhamento-page .spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+.acompanhamento-page .empty-state {
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: #8995a7;
+}
+
+.acompanhamento-page .empty-state i {
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+    color: #b2bfd1;
+}
+
+
+/* =========================================================
+   ERROS
+   ========================================================= */
+
+.acompanhamento-page .alert {
+    border-radius: 10px;
+    font-size: 0.88rem;
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE
+   ========================================================= */
+
+@media (max-width: 991px) {
+
+    .acompanhamento-page .indicator-card h3 {
+        font-size: 1.65rem;
+    }
+
+}
+
+@media (max-width: 767px) {
+
+    .acompanhamento-page .card-body {
+        padding: 1rem;
+    }
+
+    .acompanhamento-page .page-heading h4 {
+        font-size: 1.2rem;
+    }
+
+    .acompanhamento-page .indicator-card h3 {
+        font-size: 1.5rem;
+    }
+
+    .acompanhamento-page .table {
+        font-size: 0.8rem;
+    }
+
+    .acompanhamento-page .table thead th,
+    .acompanhamento-page .table tbody td {
+        padding: 0.75rem 0.65rem;
+    }
+
+    .acompanhamento-page .auditor-list {
+        min-width: 180px;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .acompanhamento-page .indicator-card .indicator-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+
+    .acompanhamento-page .indicator-card h3 {
+        font-size: 1.35rem;
+    }
+
+}
